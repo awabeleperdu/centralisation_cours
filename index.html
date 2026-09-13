@@ -34,6 +34,21 @@ header.topbar{position:sticky;top:0;z-index:20;background:rgba(10,13,18,.92);bac
 main{max-width:900px;margin:0 auto;padding:32px 20px 80px;}
 .page-title{font-size:1.5rem;color:#fff;margin:0 0 20px;}
 
+/* shortcuts dropdown */
+.shortcuts-dropdown{margin-top:24px;}
+.shortcuts-toggle{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:.88rem;padding:13px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:.15s;}
+.shortcuts-toggle:hover{border-color:var(--amber);color:var(--amber);}
+.shortcuts-arrow{transition:transform .2s;color:var(--text-dim);}
+.shortcuts-dropdown.open .shortcuts-arrow{transform:rotate(180deg);}
+.shortcuts-panel{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.shortcuts-dropdown.open .shortcuts-panel{max-height:400px;}
+.shortcuts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;padding-top:12px;}
+.shortcut-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--text);transition:.15s;text-align:center;}
+.shortcut-card:hover{border-color:var(--amber);transform:translateY(-2px);}
+.shortcut-icon{font-size:1.5rem;}
+.shortcut-label{font-size:.76rem;color:var(--text-dim);}
+.shortcut-card:hover .shortcut-label{color:var(--text);}
+
 /* form */
 .add-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:32px;}
 .add-panel h2{margin:0 0 4px;font-size:1.1rem;color:#fff;}
@@ -109,6 +124,41 @@ footer{text-align:center;color:var(--text-dim);font-size:.78rem;padding:30px 20p
   <div class="empty-state" id="empty-state" style="display:none;">
     <div class="big">🗂️</div>
     <div>Aucun cours pour l'instant. Ajoute ton premier cours ci-dessous.</div>
+  </div>
+
+  <div class="shortcuts-dropdown">
+    <button class="shortcuts-toggle" id="shortcuts-toggle">
+      <span>🔗 Raccourcis</span>
+      <span class="shortcuts-arrow" id="shortcuts-arrow">▾</span>
+    </button>
+    <div class="shortcuts-panel" id="shortcuts-panel">
+      <div class="shortcuts-grid">
+        <a class="shortcut-card" href="https://mail.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">📧</span><span class="shortcut-label">Gmail</span>
+        </a>
+        <a class="shortcut-card" href="https://drive.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">🗂️</span><span class="shortcut-label">Drive</span>
+        </a>
+        <a class="shortcut-card" href="https://myaccount.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">👤</span><span class="shortcut-label">Mon compte</span>
+        </a>
+        <a class="shortcut-card" href="https://calendar.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">📅</span><span class="shortcut-label">Agenda</span>
+        </a>
+        <a class="shortcut-card" href="https://classroom.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">🎓</span><span class="shortcut-label">Classroom</span>
+        </a>
+        <a class="shortcut-card" href="https://docs.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">📄</span><span class="shortcut-label">Docs</span>
+        </a>
+        <a class="shortcut-card" href="https://translate.google.com" target="_blank" rel="noopener">
+          <span class="shortcut-icon">🌐</span><span class="shortcut-label">Traduction</span>
+        </a>
+        <a class="shortcut-card" href="https://claude.ai" target="_blank" rel="noopener">
+          <span class="shortcut-icon">✨</span><span class="shortcut-label">Claude</span>
+        </a>
+      </div>
+    </div>
   </div>
 
   <div class="add-panel">
@@ -274,6 +324,10 @@ document.getElementById('btn-add').addEventListener('click', ()=>{
 document.getElementById('search').addEventListener('input', render);
 
 render();
+
+document.getElementById('shortcuts-toggle').addEventListener('click', ()=>{
+  document.querySelector('.shortcuts-dropdown').classList.toggle('open');
+});
 </script>
 </body>
 </html>
