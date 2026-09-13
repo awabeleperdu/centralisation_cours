@@ -32,6 +32,7 @@ header.topbar{position:sticky;top:0;z-index:20;background:rgba(10,13,18,.92);bac
 .brand-sub{color:var(--text-dim);font-size:.8rem;font-family:var(--mono);margin-left:auto;}
 
 main{max-width:900px;margin:0 auto;padding:32px 20px 80px;}
+.page-title{font-size:1.5rem;color:#fff;margin:0 0 20px;}
 
 /* form */
 .add-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:32px;}
@@ -97,9 +98,22 @@ footer{text-align:center;color:var(--text-dim);font-size:.78rem;padding:30px 20p
 </header>
 
 <main>
+  <h1 class="page-title">Mes cours</h1>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="🔎 Rechercher un cours...">
+    <span class="count-badge" id="count-badge"></span>
+  </div>
+
+  <div id="course-list"></div>
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <div class="big">🗂️</div>
+    <div>Aucun cours pour l'instant. Ajoute ton premier cours ci-dessous.</div>
+  </div>
+
   <div class="add-panel">
-    <h2>Ajouter un cours</h2>
-    <p class="hint">Renseigne le nom du cours et son lien — il apparaîtra en dessous, enregistré sur cet appareil.</p>
+    <h2>+ Ajouter un cours</h2>
+    <p class="hint">Renseigne le nom du cours et son lien — il apparaîtra en haut de ta liste, enregistré sur cet appareil.</p>
     <div class="form-row">
       <div class="field">
         <label>NOM DU COURS</label>
@@ -113,17 +127,6 @@ footer{text-align:center;color:var(--text-dim);font-size:.78rem;padding:30px 20p
     <div class="form-actions">
       <button class="btn primary" id="btn-add">+ Ajouter le cours</button>
     </div>
-  </div>
-
-  <div class="toolbar">
-    <input type="text" id="search" placeholder="🔎 Rechercher un cours...">
-    <span class="count-badge" id="count-badge"></span>
-  </div>
-
-  <div id="course-list"></div>
-  <div class="empty-state" id="empty-state" style="display:none;">
-    <div class="big">🗂️</div>
-    <div>Aucun cours pour l'instant. Ajoute ton premier cours ci-dessus.</div>
   </div>
 </main>
 
@@ -253,7 +256,7 @@ document.getElementById('btn-add').addEventListener('click', ()=>{
     alert('Merci de renseigner un nom et un lien.');
     return;
   }
-  courses.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2), name, url });
+  courses.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2), name, url });
   saveCourses(courses);
   nameInput.value = '';
   urlInput.value = '';
