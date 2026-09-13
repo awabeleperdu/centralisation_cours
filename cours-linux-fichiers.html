@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Système de fichiers Linux — Cours interactif BTS CIEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d12; --panel:#11161d; --panel-2:#161c25; --border:#232b37;
+  --text:#d5dbe3; --text-dim:#7c8798; --amber:#e3b341; --green:#7ee787;
+  --red:#ff7b72; --blue:#58a6ff; --purple:#c9a6ff;
+  --mono:'JetBrains Mono', ui-monospace, monospace; --sans:'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;}
+::selection{background:var(--amber);color:#0a0d12;}
+
+header.topbar{position:sticky;top:0;z-index:50;background:rgba(10,13,18,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.brand{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:8px;}
+.brand .dot{color:var(--amber);}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
+nav.tabs button{font-family:var(--mono);font-size:.82rem;background:none;border:1px solid transparent;color:var(--text-dim);padding:7px 12px;border-radius:6px;cursor:pointer;transition:.15s;}
+nav.tabs button:hover{color:var(--text);border-color:var(--border);}
+nav.tabs button.active{color:var(--bg);background:var(--amber);font-weight:600;}
+
+main{max-width:1100px;margin:0 auto;padding:32px 20px 80px;}
+section.page{display:none;animation:fade .25s ease;}
+section.page.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+h1{font-size:1.9rem;margin:0 0 6px;color:#fff;letter-spacing:-.01em;}
+h2{font-size:1.35rem;margin:40px 0 14px;color:#fff;border-bottom:1px solid var(--border);padding-bottom:10px;}
+h2:first-of-type{margin-top:0;}
+h3{font-size:1.05rem;color:var(--amber);margin:24px 0 8px;}
+p{color:var(--text);}
+.subtitle{color:var(--text-dim);font-size:1rem;margin-bottom:28px;}
+code, .mono{font-family:var(--mono);}
+code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.88em;color:var(--green);}
+
+pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.65;color:#c9d1d9;margin:10px 0 18px;}
+pre.code .c1{color:var(--text-dim);}
+
+.box{border-left:3px solid;border-radius:6px;padding:12px 16px;margin:16px 0;background:var(--panel);}
+.box-retenir{border-color:var(--green);}
+.box-attention{border-color:var(--red);}
+.box-title{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.03em;margin-bottom:4px;}
+.box-retenir .box-title{color:var(--green);}
+.box-attention .box-title{color:var(--red);}
+
+.toc-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:0 0 30px;}
+.toc-title{font-family:var(--mono);font-size:.75rem;color:var(--text-dim);letter-spacing:.03em;margin-bottom:10px;}
+.toc-box a{display:inline-block;color:var(--blue);text-decoration:none;font-size:.85rem;margin:0 14px 8px 0;font-family:var(--mono);}
+.toc-box a:hover{text-decoration:underline;}
+.badge-plus{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--purple);border:1px solid #6e4fa3;background:rgba(160,120,255,.1);padding:1px 8px;border-radius:20px;vertical-align:middle;letter-spacing:.02em;}
+.plus-divider{display:flex;align-items:center;gap:12px;margin:44px 0 10px;color:var(--text-dim);font-family:var(--mono);font-size:.78rem;}
+.plus-divider::before,.plus-divider::after{content:"";flex:1;height:1px;background:var(--border);}
+
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.card h4{margin:0 0 6px;font-size:.95rem;color:#fff;}
+.card p{margin:0;color:var(--text-dim);font-size:.88rem;}
+
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.86rem;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+th{color:var(--text-dim);font-weight:600;font-family:var(--mono);font-size:.76rem;}
+td code{white-space:nowrap;}
+
+.mindmap{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+.mm-row{display:flex;gap:10px;flex-wrap:wrap;}
+.mm-node{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;}
+.mm-node.root{background:var(--amber);color:#0a0d12;font-weight:700;border:none;}
+
+.accordion{border:1px solid var(--border);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--panel);}
+.acc-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;cursor:pointer;font-size:.92rem;color:var(--text);}
+.acc-head:hover{background:var(--panel-2);}
+.acc-head .lvl{font-family:var(--mono);font-size:.72rem;color:var(--amber);border:1px solid var(--amber);padding:1px 7px;border-radius:20px;margin-right:10px;}
+.acc-arrow{transition:.2s;color:var(--text-dim);}
+.accordion.open .acc-arrow{transform:rotate(90deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:1px solid transparent;}
+.accordion.open .acc-body{max-height:900px;border-top:1px solid var(--border);}
+.acc-body-inner{padding:14px 16px;}
+
+.flash-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flash-card{width:100%;max-width:480px;height:220px;perspective:1200px;cursor:pointer;}
+.flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+.flash-card.flipped .flash-inner{transform:rotateY(180deg);}
+.flash-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;border:1px solid var(--border);}
+.flash-front{background:var(--panel);}
+.flash-back{background:var(--panel-2);transform:rotateY(180deg);color:var(--green);}
+.flash-face p{font-size:1.05rem;font-family:var(--mono);margin:0;}
+.flash-controls{display:flex;gap:12px;align-items:center;}
+.flash-count{color:var(--text-dim);font-family:var(--mono);font-size:.85rem;}
+
+button.btn{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:7px;cursor:pointer;font-size:.85rem;transition:.15s;}
+button.btn:hover{border-color:var(--amber);color:var(--amber);}
+button.btn.primary{background:var(--amber);color:#0a0d12;border:none;font-weight:700;}
+button.btn.primary:hover{opacity:.9;color:#0a0d12;}
+
+.qcm-q{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+.qcm-q p.question{margin:0 0 10px;font-weight:600;color:#fff;}
+.qcm-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:4px;}
+.qcm-opt:hover{background:var(--panel-2);}
+.qcm-opt input{accent-color:var(--amber);}
+.qcm-feedback{display:none;font-size:.85rem;margin-top:8px;padding:8px 10px;border-radius:6px;font-family:var(--mono);}
+.qcm-feedback.ok{background:rgba(126,231,135,.1);color:var(--green);display:block;}
+.qcm-feedback.ko{background:rgba(255,123,114,.1);color:var(--red);display:block;}
+#qcm-score{text-align:center;font-family:var(--mono);font-size:1.3rem;padding:20px;border:1px solid var(--border);border-radius:10px;background:var(--panel);display:none;margin-top:20px;}
+
+/* terminal simulator */
+.term-wrap{background:#0d1117;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:20px 0;}
+.term-topbar{background:var(--panel-2);padding:8px 14px;font-family:var(--mono);font-size:.75rem;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.term-dots{display:flex;gap:6px;}
+.term-dots span{width:9px;height:9px;border-radius:50%;background:#3a4150;}
+#term-output{height:280px;overflow-y:auto;padding:14px 16px;font-family:var(--mono);font-size:.83rem;color:#c9d1d9;white-space:pre-wrap;word-break:break-word;}
+#term-output .prompt-line{color:var(--green);}
+#term-output .err{color:var(--red);}
+#term-output .dir-color{color:var(--blue);}
+.term-input-row{display:flex;align-items:center;padding:8px 16px;border-top:1px solid var(--border);background:#0d1117;}
+.term-prompt-live{font-family:var(--mono);font-size:.83rem;color:var(--green);white-space:nowrap;margin-right:6px;}
+#term-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:.83rem;}
+.term-hint{color:var(--text-dim);font-size:.78rem;margin-top:8px;}
+
+.res-link{display:block;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:var(--text);transition:.15s;}
+.res-link:hover{border-color:var(--amber);}
+.res-link .res-title{color:#fff;font-weight:600;font-size:.95rem;}
+.res-link .res-desc{color:var(--text-dim);font-size:.83rem;margin-top:3px;}
+.res-link .res-url{font-family:var(--mono);color:var(--blue);font-size:.78rem;margin-top:4px;}
+
+footer{text-align:center;color:var(--text-dim);font-size:.8rem;padding:30px 20px;font-family:var(--mono);}
+
+@media(max-width:640px){
+  .topbar-inner{flex-direction:column;align-items:flex-start;}
+  nav.tabs{width:100%;overflow-x:auto;}
+  h1{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">$ <span class="dot">ls /cours</span></div>
+    <nav class="tabs">
+      <button data-page="accueil" class="active">Accueil</button>
+      <button data-page="cours">Le Cours</button>
+      <button data-page="exercices">Exercices</button>
+      <button data-page="revisions">Révisions</button>
+      <button data-page="ressources">Ressources</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= ACCUEIL ================= -->
+<section class="page active" id="accueil">
+  <h1>Le système de fichiers sous Linux</h1>
+  <p class="subtitle">Des blocs de données bruts sur un disque à l'arborescence de fichiers et de répertoires — niveau BTS CIEL.</p>
+
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Un <strong>système de fichiers</strong> est le mécanisme qui organise une succession de blocs de données sur un support de stockage pour la présenter à l'utilisateur sous forme de <strong>répertoires</strong> et de <strong>fichiers</strong>. Sous Linux, tout part d'une racine unique notée <code>/</code> — il n'existe pas de lecteurs "C:" ou "D:" comme sous Windows.
+  </div>
+
+  <h2>Objectifs du cours</h2>
+  <div class="grid grid-3">
+    <div class="card"><h4>Comprendre le stockage bas niveau</h4><p>Blocs, partitions, tables MBR/GPT.</p></div>
+    <div class="card"><h4>Connaître l'arborescence Linux</h4><p>Rôle de /bin, /etc, /home, /var, /dev...</p></div>
+    <div class="card"><h4>Maîtriser "tout est fichier"</h4><p>Fichiers spéciaux, mode caractère/bloc.</p></div>
+    <div class="card"><h4>Naviguer avec les chemins</h4><p>Notation absolue, relative, . et ..</p></div>
+    <div class="card"><h4>Lire une sortie ls -l</h4><p>Type, permissions, propriétaire, taille...</p></div>
+    <div class="card"><h4>Manipuler fichiers/répertoires</h4><p>cd, ls, mkdir, rm, cp, mv en ligne de commande.</p></div>
+  </div>
+
+  <h2>Prérequis</h2>
+  <ul>
+    <li>Aucune expérience préalable de Linux ou du terminal n'est nécessaire</li>
+    <li>Notion générale de ce qu'est un fichier / un dossier (vu sous Windows par exemple)</li>
+  </ul>
+
+  <h2>Carte mentale du cours</h2>
+  <div class="mindmap">
+    <div class="mm-row"><div class="mm-node root">Système de fichiers Linux</div></div>
+    <div class="mm-row">
+      <div class="mm-node">Périphériques & partitions<br><span style="color:var(--text-dim);font-size:.78rem">blocs, MBR/GPT, sda1...</span></div>
+      <div class="mm-node">Systèmes de fichiers (FS)<br><span style="color:var(--text-dim);font-size:.78rem">Ext4, FAT, NTFS, iso9660</span></div>
+      <div class="mm-node">Arborescence<br><span style="color:var(--text-dim);font-size:.78rem">/, /bin, /etc, /home...</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Tout est fichier<br><span style="color:var(--text-dim);font-size:.78rem">/dev, mode caractère/bloc</span></div>
+      <div class="mm-node">Montage<br><span style="color:var(--text-dim);font-size:.78rem">mount, point de montage</span></div>
+      <div class="mm-node">Chemins<br><span style="color:var(--text-dim);font-size:.78rem">absolu, relatif, pwd, . ..</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Types & permissions<br><span style="color:var(--text-dim);font-size:.78rem">ls -l, d/-/l/c/b/s/p</span></div>
+      <div class="mm-node">Commandes de base<br><span style="color:var(--text-dim);font-size:.78rem">cd, ls, mkdir, rm, cp, mv</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COURS ================= -->
+<section class="page" id="cours">
+  <h1>Le cours structuré</h1>
+  <p class="subtitle">Programme couvert intégralement (sections 1 à 9, basé sur le support de cours fourni), puis des approfondissements signalés <span class="badge-plus">+ hors programme</span> (sections 10 à 13).</p>
+
+  <div class="toc-box">
+    <div class="toc-title">Sommaire</div>
+    <a href="#c1">1. Périphériques et partitions</a>
+    <a href="#c2">2. Numérotation des partitions</a>
+    <a href="#c3">3. Systèmes de fichiers (FS)</a>
+    <a href="#c4">4. Arborescence Linux</a>
+    <a href="#c5">5. Tout est fichier</a>
+    <a href="#c6">6. Montage des périphériques</a>
+    <a href="#c7">7. Notation des chemins</a>
+    <a href="#c8">8. Types de fichiers et ls -l</a>
+    <a href="#c9">9. Commandes de base</a>
+    <a href="#c10">10. Permissions en détail <span class="badge-plus">+</span></a>
+    <a href="#c11">11. Liens physiques et symboliques <span class="badge-plus">+</span></a>
+    <a href="#c12">12. Rechercher des fichiers <span class="badge-plus">+</span></a>
+    <a href="#c13">13. Redirections et tubes <span class="badge-plus">+</span></a>
+  </div>
+
+  <h2 id="c1">1. Périphériques et partitions</h2>
+  <p>Les données traitées par un ordinateur proviennent de <strong>périphériques</strong> : disques durs, clés USB, disques optiques... Ces périphériques se présentent au système d'exploitation comme une succession de <strong>blocs de données numérotés</strong>.</p>
+  <p>Un disque dur ou une clé USB est rarement utilisé directement : il est <strong>découpé en partitions</strong>. Une partition apparaît comme un périphérique plus petit, indépendant. La <strong>table de partitions</strong> se situe au tout début du disque et décrit ce découpage.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Cette organisation en blocs/partitions ne définit encore <strong>aucune notion de fichier ou de répertoire</strong> : elle permet seulement de stocker des données les unes à la suite des autres. C'est le système de fichiers (section 3) qui ajoute cette structure.
+  </div>
+  <p>Deux formats de table de partitions existent :</p>
+  <table>
+    <tr><th>Table</th><th>Limites</th></tr>
+    <tr><td><strong>MBR</strong> (Master Boot Record)</td><td>Système ancien, 4 partitions primaires max, taille de disque limitée</td></tr>
+    <tr><td><strong>GPT</strong> (GUID Partition Table)</td><td>Standard actuel recommandé, jusqu'à 128 partitions, gère les disques de grande capacité</td></tr>
+  </table>
+
+  <h2 id="c2">2. Numérotation des partitions</h2>
+  <p>On distingue deux types de partitions :</p>
+  <table>
+    <tr><th>Type</th><th>Description</th><th>Numérotation</th></tr>
+    <tr><td>Primaire</td><td>Existe physiquement sur le disque</td><td>Limitée à 4, numérotées 1 à 4 selon l'ordre d'apparition sur le disque</td></tr>
+    <tr><td>Étendue / logique</td><td>"Simulée" à l'intérieur d'une partition primaire existante</td><td>Les lecteurs logiques sont numérotés de 5 à 20, selon l'ordre d'apparition dans la partition étendue</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR — exemple classique</div>
+    Avec 2 partitions primaires, puis 1 partition étendue contenant 3 lecteurs logiques, puis une dernière partition primaire :<br>
+    <code>sda1</code> et <code>sda2</code> (les 2 primaires), <code>sda3</code> (l'étendue elle-même), <code>sda5</code>, <code>sda6</code>, <code>sda7</code> (les 3 logiques dedans), puis <code>sda4</code> (la dernière primaire). Remarquez qu'il n'y a jamais de <code>sda</code> simple sans numéro pour désigner directement le disque, et que le numéro 4 "saute" au profit de la dernière primaire même si elle apparaît après les logiques dans l'ordre de création.
+  </div>
+  <p><code>sda</code> signifie <strong>s</strong>ata <strong>d</strong>isk (premier disque SATA/SCSI/USB détecté) ; un second disque serait <code>sdb</code>, etc.</p>
+
+  <h2 id="c3">3. Systèmes de fichiers (FS)</h2>
+  <p>Chaque partition doit être <strong>formatée</strong> avec un système de fichiers pour devenir opérationnelle. Un système de fichiers est le format qui organise les blocs de données bruts pour les présenter sous forme de répertoires et de fichiers. Il doit être :</p>
+  <ul>
+    <li><strong>Accessible</strong> en lecture et en écriture ;</li>
+    <li><strong>Stable</strong> : un même numéro de bloc doit toujours pointer vers le même emplacement physique, pour qu'une donnée écrite puisse être relue fidèlement ;</li>
+    <li>Finalement <strong>représentable</strong> sous forme d'arborescence de répertoires et de fichiers.</li>
+  </ul>
+  <table>
+    <tr><th>Système de fichiers</th><th>Utilisation courante</th></tr>
+    <tr><td>FAT</td><td>Disquettes et clés USB</td></tr>
+    <tr><td>NTFS</td><td>Windows</td></tr>
+    <tr><td>Ext2, Ext3, Ext4</td><td>Linux</td></tr>
+    <tr><td>iso9660</td><td>CD</td></tr>
+    <tr><td>udf</td><td>DVD</td></tr>
+  </table>
+
+  <h2 id="c4">4. Arborescence Linux</h2>
+  <p>Contrairement à Windows, il n'existe pas de lecteurs <code>A:</code>, <code>C:</code>, etc. L'entrée du système de fichiers se situe à la <strong>racine</strong>, notée <code>/</code>. Un certain nombre de répertoires standards existent par défaut sous cette racine (référence complète : <code>man hier</code>).</p>
+  <table>
+    <tr><th>Répertoire</th><th>Contenu</th></tr>
+    <tr><td><code>/</code></td><td>Répertoire "racine", point d'entrée du système de fichiers</td></tr>
+    <tr><td><code>/boot</code></td><td>Le noyau Linux et l'amorceur (bootloader)</td></tr>
+    <tr><td><code>/bin</code>, <code>/usr/bin</code></td><td>Exécutables de base : <code>cp</code>, <code>mv</code>, <code>ls</code>, etc.</td></tr>
+    <tr><td><code>/dev</code></td><td>Fichiers spéciaux (devices) faisant le lien avec les périphériques</td></tr>
+    <tr><td><code>/etc</code></td><td>Fichiers de configuration du système</td></tr>
+    <tr><td><code>/home</code></td><td>Fichiers personnels des utilisateurs (un sous-répertoire par utilisateur)</td></tr>
+    <tr><td><code>/lib</code>, <code>/usr/lib</code></td><td>Bibliothèques et modules du noyau (<code>/lib/modules</code>)</td></tr>
+    <tr><td><code>/media</code></td><td>Points de montage des médias usuels : cd, dvd, clé usb</td></tr>
+    <tr><td><code>/root</code></td><td>Répertoire personnel de l'administrateur</td></tr>
+    <tr><td><code>/sbin</code>, <code>/usr/sbin</code></td><td>Exécutables destinés à l'administration système</td></tr>
+    <tr><td><code>/tmp</code></td><td>Fichiers temporaires utilisés par certains programmes</td></tr>
+    <tr><td><code>/usr</code></td><td>Exécutables, bibliothèques et fichiers partagés des programmes installés</td></tr>
+    <tr><td><code>/var</code></td><td>Fichiers de maintenance du système (journaux notamment dans <code>/var/log</code>)</td></tr>
+  </table>
+
+  <h2 id="c5">5. Tout est fichier : l'accès aux périphériques</h2>
+  <p>Particularité des systèmes Unix : <strong>chaque périphérique</strong> (souris, disque dur, lecteur CD, carte son...) est représenté par un fichier spécial, situé principalement dans <code>/dev</code>.</p>
+  <table>
+    <tr><th>Type</th><th>Description</th></tr>
+    <tr><td>Mode caractère</td><td>Représente claviers, souris, terminaux, modems, imprimantes... Transfert d'un octet à la fois</td></tr>
+    <tr><td>Mode bloc</td><td>Représente disques durs (et leurs partitions), clés USB, CD/DVD... Transfert de plusieurs octets à des emplacements précis</td></tr>
+  </table>
+  <p><strong>Écrire</strong> dans un tel fichier envoie des commandes au périphérique ; <strong>lire</strong> ce fichier permet d'en recevoir des données. Quelques exemples :</p>
+  <table>
+    <tr><th>Fichier</th><th>Périphérique</th></tr>
+    <tr><td><code>/dev/input/mouse0</code></td><td>Souris</td></tr>
+    <tr><td><code>/dev/sda</code></td><td>Premier disque dur (sata, scsi ou usb)</td></tr>
+    <tr><td><code>/dev/sdb</code></td><td>Second disque dur</td></tr>
+    <tr><td><code>/dev/tty0</code></td><td>Premier port série ou infrarouge</td></tr>
+    <tr><td><code>/dev/null</code></td><td>Périphérique fictif en sortie : absorbe tout ce qu'on y écrit</td></tr>
+    <tr><td><code>/dev/zero</code></td><td>Périphérique fictif en entrée : ne renvoie que des zéros, utile pour remplir un bloc</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    « Sous UNIX, tout est fichier ! » — cette méthode, très simple, unifie l'accès aux périphériques et aux données : les mêmes commandes de lecture/écriture s'appliquent, qu'il s'agisse d'un document texte ou d'un disque dur entier.
+  </div>
+
+  <h2 id="c6">6. Le montage des périphériques</h2>
+  <p>Chaque partition possède son propre système de fichiers, avec sa propre arborescence. Pour rendre le contenu d'une seconde partition accessible depuis l'arborescence principale, on la <strong>monte</strong> dans un répertoire existant appelé <strong>point de montage</strong>, à l'aide de la commande <code>mount</code> :</p>
+  <pre class="code"># mount /dev/sda2 /home</pre>
+  <p>Cette commande intègre le système de fichiers de la partition <code>/dev/sda2</code> dans le répertoire <code>/home</code> de la partition principale : on parle de "monter <code>/dev/sda2</code> dans le point de montage <code>/home</code>".</p>
+
+  <h2 id="c7">7. Notation d'un chemin</h2>
+  <p>Il existe deux façons de désigner un chemin vers un fichier ou un répertoire :</p>
+  <table>
+    <tr><th>Notation</th><th>Principe</th></tr>
+    <tr><td>Absolue</td><td>Le chemin est indiqué depuis la racine <code>/</code></td></tr>
+    <tr><td>Relative</td><td>Le chemin est indiqué par rapport au répertoire de travail courant</td></tr>
+  </table>
+  <p>La commande <code>pwd</code> (print working directory) affiche le répertoire courant. Deux répertoires spéciaux existent dans chaque dossier :</p>
+  <table>
+    <tr><th>Notation</th><th>Signification</th></tr>
+    <tr><td><code>.</code></td><td>Le répertoire courant (on reste au même endroit)</td></tr>
+    <tr><td><code>..</code></td><td>Le répertoire parent (on remonte d'un niveau)</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Un fichier ou dossier dont le nom commence par un point (ex : <code>.profile</code>) est un fichier ou dossier <strong>caché</strong> — il ne s'affiche pas avec un simple <code>ls</code>, il faut l'option <code>-a</code> (voir section 9).
+  </div>
+  <h3>Exemple à retenir (repris dans les exercices)</h3>
+  <p>On suppose la commande <code>pwd</code> renvoie <code>/home/toto</code>, et que ce répertoire contient : les fichiers cachés <code>.profile</code>, ainsi que <code>mbox</code> et <code>main.cxx</code>, et deux sous-répertoires <code>rep1</code> (contenant <code>fic1</code>) et <code>mail</code> (contenant <code>toto</code>).</p>
+  <ul>
+    <li>Référence <strong>absolue</strong> de <code>fic1</code> : <code>/home/toto/rep1/fic1</code></li>
+    <li>Référence <strong>relative</strong> (depuis <code>/home/toto</code>) de <code>mbox</code> : <code>mbox</code> (ou <code>./mbox</code>)</li>
+    <li>Référence <strong>relative</strong> de <code>fic1</code> : <code>rep1/fic1</code></li>
+  </ul>
+  <p>Essayez ce scénario vous-même dans le terminal simulé de la section 9 !</p>
+
+  <h2 id="c8">8. Types de fichiers et lecture de <code>ls -l</code></h2>
+  <p>La commande <code>ls -l</code> (voir section suivante) affiche une ligne détaillée par fichier, structurée en plusieurs champs :</p>
+  <pre class="code">-rw-r--r--  1 cpb  prof   1240  12 sept 10:32  fic1
+drwxr-xr-x  2 cpb  prof   4096  12 sept 10:15  un-rep</pre>
+  <table>
+    <tr><th>Champ</th><th>Signification</th></tr>
+    <tr><td>1er caractère</td><td>Type de fichier (voir tableau ci-dessous)</td></tr>
+    <tr><td>9 caractères suivants</td><td>Permissions (détaillées en section 10)</td></tr>
+    <tr><td>Nombre</td><td>Nombre de liens physiques sur le fichier</td></tr>
+    <tr><td>1er nom</td><td>Utilisateur propriétaire</td></tr>
+    <tr><td>2e nom</td><td>Groupe propriétaire</td></tr>
+    <tr><td>Taille</td><td>Taille en octets</td></tr>
+    <tr><td>Date</td><td>Date et heure de dernière modification</td></tr>
+    <tr><td>Dernier champ</td><td>Nom du fichier</td></tr>
+  </table>
+  <p>Le premier caractère indique le <strong>type</strong> de fichier :</p>
+  <table>
+    <tr><th>Caractère</th><th>Type</th></tr>
+    <tr><td><code>-</code></td><td>Fichier ordinaire (régulier)</td></tr>
+    <tr><td><code>d</code></td><td>Répertoire (directory)</td></tr>
+    <tr><td><code>l</code></td><td>Lien symbolique (link)</td></tr>
+    <tr><td><code>c</code></td><td>Périphérique en mode caractère (ex : terminal)</td></tr>
+    <tr><td><code>b</code></td><td>Périphérique en mode bloc (ex : partition de disque dur)</td></tr>
+    <tr><td><code>s</code></td><td>Socket (communication entre processus)</td></tr>
+    <tr><td><code>p</code></td><td>Tube nommé / pipe (communication entre processus)</td></tr>
+  </table>
+
+  <h2 id="c9">9. Commandes de base pour la manipulation de fichiers</h2>
+
+  <h3><code>cd</code> — changer de répertoire</h3>
+  <p>Synopsis : <code>cd [référence]</code></p>
+  <ul>
+    <li><code>cd</code> seule : va au répertoire personnel de l'utilisateur connecté (ex : <code>/home/toto</code>)</li>
+    <li><code>cd -</code> : retourne au répertoire utilisé avant le <code>cd</code> précédent</li>
+    <li>Sinon, <code>référence</code> est un chemin relatif ou absolu</li>
+  </ul>
+
+  <h3><code>ls</code> — lister le contenu d'un répertoire</h3>
+  <p>Synopsis : <code>ls [-adFhilrRStuU] [--color=(none|always|auto)] {référence}</code></p>
+  <table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>-l</code></td><td>Affichage détaillé (long) — voir section 8</td></tr>
+    <tr><td><code>-a</code></td><td>Affiche tous les fichiers, y compris les fichiers cachés</td></tr>
+    <tr><td><code>-d</code></td><td>Affiche les infos sur le répertoire lui-même, pas son contenu (souvent combiné : <code>-ld</code>)</td></tr>
+    <tr><td><code>-R</code></td><td>Affiche récursivement le contenu des sous-répertoires</td></tr>
+  </table>
+
+  <h3><code>mkdir</code> — créer un répertoire</h3>
+  <p>Synopsis : <code>mkdir [-vp] référence {référence}</code></p>
+  <table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>-v</code></td><td>Mode verbeux : détaille ce qui est fait</td></tr>
+    <tr><td><code>-p</code></td><td>Crée les sous-répertoires intermédiaires manquants</td></tr>
+  </table>
+
+  <h3><code>rmdir</code> — supprimer un répertoire (vide uniquement)</h3>
+  <p>Synopsis : <code>rmdir [-vp] référence {référence}</code> — échoue si le répertoire n'est pas vide.</p>
+
+  <h3><code>rm</code> — supprimer un fichier</h3>
+  <p>Synopsis : <code>rm [-ifrv] référence {référence}</code></p>
+  <table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>-r</code></td><td>Supprime un répertoire et tout son contenu, récursivement</td></tr>
+    <tr><td><code>-i</code></td><td>Demande confirmation avant chaque suppression</td></tr>
+    <tr><td><code>-f</code></td><td>Force la suppression, même avec <code>-i</code></td></tr>
+  </table>
+
+  <h3><code>cp</code> — copier un fichier</h3>
+  <p>Synopsis : <code>cp [-adfirpv] source {source} destination</code>. Sans <code>-r</code>, la source ne peut pas être un répertoire.</p>
+
+  <h3><code>mv</code> — déplacer ou renommer</h3>
+  <p>Synopsis : <code>mv [-ivf] source {source} destination</code>. Si la destination existe déjà et qu'il n'y a qu'une seule source, c'est un renommage.</p>
+
+  <h3>🖥️ Terminal simulé — entraînez-vous en conditions réelles</h3>
+  <p style="color:var(--text-dim);font-size:.88rem;">Vous êtes connecté en tant que <code>toto</code>, dans <code>/home/toto</code>, avec l'arborescence de l'exemple de la section 7 (<code>.profile</code>, <code>mbox</code>, <code>main.cxx</code>, <code>rep1/fic1</code>, <code>mail/toto</code>). Essayez : <code>pwd</code>, <code>ls -a</code>, <code>cd rep1</code>, <code>mkdir projet</code>, <code>cp mbox projet/</code>...</p>
+  <div class="term-wrap">
+    <div class="term-topbar">
+      <span class="term-dots"><span></span><span></span><span></span></span>
+      <span>toto@bts-ciel</span>
+    </div>
+    <div id="term-output"></div>
+    <div class="term-input-row">
+      <span class="term-prompt-live" id="term-prompt-live">toto@bts-ciel:~$</span>
+      <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+  <p class="term-hint">Commandes disponibles : pwd, cd, ls [-a] [-l], mkdir [-p], rmdir, rm [-r], cp, mv, cat, clear, help</p>
+
+  <div class="plus-divider"><span>Sections suivantes hors programme du support fourni — pour approfondir</span></div>
+
+  <h2 id="c10">10. Les permissions en détail <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le support de cours annonce les permissions "détaillées plus tard" : voici l'essentiel. Les 9 caractères après le type de fichier (ex : <code>rwxr-xr-x</code>) se lisent par groupes de 3 :</p>
+  <table>
+    <tr><th>Groupe</th><th>Concerne</th></tr>
+    <tr><td>1er groupe (ex : <code>rwx</code>)</td><td>Le propriétaire du fichier</td></tr>
+    <tr><td>2e groupe (ex : <code>r-x</code>)</td><td>Le groupe propriétaire</td></tr>
+    <tr><td>3e groupe (ex : <code>r-x</code>)</td><td>Tous les autres utilisateurs</td></tr>
+  </table>
+  <p>Dans chaque groupe : <code>r</code> = lecture (read), <code>w</code> = écriture (write), <code>x</code> = exécution (execute), <code>-</code> = permission absente.</p>
+  <pre class="code">chmod u+x script.sh     <span class="c1"># ajoute le droit d'exécution pour le propriétaire</span>
+chmod 755 script.sh     <span class="c1"># notation octale : rwx r-x r-x (7=rwx, 5=r-x)</span>
+chown toto:profs fic1   <span class="c1"># change le propriétaire (toto) et le groupe (profs)</span></pre>
+
+  <h2 id="c11">11. Liens physiques et liens symboliques <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le champ "nombre de liens physiques" de <code>ls -l</code> (section 8) fait référence à une notion clé : chaque fichier est en réalité identifié par un numéro unique appelé <strong>inode</strong>, et un nom de fichier n'est qu'une <strong>référence</strong> vers cet inode.</p>
+  <table>
+    <tr><th>Type de lien</th><th>Commande</th><th>Principe</th></tr>
+    <tr><td>Lien physique (hard link)</td><td><code>ln fic1 fic2</code></td><td>Un second nom pointant vers le même inode ; supprimer l'un ne supprime pas les données tant qu'un lien existe</td></tr>
+    <tr><td>Lien symbolique (symlink)</td><td><code>ln -s fic1 raccourci</code></td><td>Un fichier spécial (type <code>l</code>) qui contient le chemin vers la cible ; devient invalide si la cible est supprimée</td></tr>
+  </table>
+
+  <h2 id="c12">12. Rechercher des fichiers <span class="badge-plus">+ hors programme</span></h2>
+  <pre class="code">find /home/toto -name "*.txt"     <span class="c1"># cherche par nom dans une arborescence</span>
+find /home/toto -type d           <span class="c1"># cherche uniquement des répertoires</span>
+grep -r "erreur" /var/log         <span class="c1"># cherche un texte dans des fichiers, récursivement</span></pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    <code>find</code> cherche des fichiers selon leurs attributs (nom, type, taille, date...), tandis que <code>grep</code> cherche du texte à l'intérieur du contenu des fichiers. Les deux sont indispensables pour naviguer efficacement dans un système Linux.
+  </div>
+
+  <h2 id="c13">13. Redirections et tubes <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le fait que "tout est fichier" (section 5) permet de rediriger facilement les entrées/sorties des commandes :</p>
+  <pre class="code">ls -l > liste.txt      <span class="c1"># redirige la sortie vers un fichier (écrase)</span>
+ls -l >> liste.txt     <span class="c1"># ajoute à la fin du fichier au lieu d'écraser</span>
+commande 2> /dev/null  <span class="c1"># jette les messages d'erreur (voir /dev/null, section 5)</span>
+ls -l | grep ".txt"    <span class="c1"># tube (pipe) : envoie la sortie de ls comme entrée de grep</span></pre>
+</section>
+
+<!-- ================= EXERCICES ================= -->
+<section class="page" id="exercices">
+  <h1>Exercices d'application</h1>
+  <p class="subtitle">Repris et prolongés à partir des exemples du support de cours. Cliquez pour voir l'énoncé, puis dépliez la solution.</p>
+  <div id="exo-list"></div>
+</section>
+
+<!-- ================= REVISIONS ================= -->
+<section class="page" id="revisions">
+  <h1>Révisions interactives</h1>
+  <p class="subtitle">Flashcards pour la mémoire, QCM pour valider vos acquis.</p>
+
+  <h2>📇 Flashcards</h2>
+  <div class="flash-wrap">
+    <div class="flash-card" id="flash-card">
+      <div class="flash-inner">
+        <div class="flash-face flash-front"><p id="flash-front-text"></p></div>
+        <div class="flash-face flash-back"><p id="flash-back-text"></p></div>
+      </div>
+    </div>
+    <div class="flash-controls">
+      <button class="btn" id="flash-prev">← Précédent</button>
+      <span class="flash-count" id="flash-count">1 / 10</span>
+      <button class="btn" id="flash-next">Suivant →</button>
+    </div>
+    <p style="color:var(--text-dim);font-size:.85rem;">Cliquez sur la carte pour la retourner</p>
+  </div>
+
+  <h2>✅ QCM final</h2>
+  <div id="qcm-list"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn primary" id="qcm-submit">Valider mes réponses</button>
+  </div>
+  <div id="qcm-score"></div>
+</section>
+
+<!-- ================= RESSOURCES ================= -->
+<section class="page" id="ressources">
+  <h1>Ressources complémentaires</h1>
+  <p class="subtitle">Pour aller plus loin et s'entraîner en continu.</p>
+
+  <h2>Outils interactifs</h2>
+  <a class="res-link" href="https://overthewire.org/wargames/bandit/" target="_blank" rel="noopener">
+    <div class="res-title">OverTheWire — Bandit</div>
+    <div class="res-desc">Wargame en ligne qui apprend les commandes Linux de base par des défis progressifs, en conditions réelles via SSH.</div>
+    <div class="res-url">overthewire.org</div>
+  </a>
+  <a class="res-link" href="https://explainshell.com" target="_blank" rel="noopener">
+    <div class="res-title">explainshell.com</div>
+    <div class="res-desc">Colle n'importe quelle commande shell : l'outil détaille chaque option et chaque partie de la commande.</div>
+    <div class="res-url">explainshell.com</div>
+  </a>
+  <a class="res-link" href="https://www.jsdos.com" target="_blank" rel="noopener">
+    <div class="res-title">JSLinux / terminaux en ligne</div>
+    <div class="res-desc">Différents émulateurs permettant de manipuler un vrai terminal Linux directement depuis un navigateur.</div>
+    <div class="res-url">bellard.org/jslinux</div>
+  </a>
+
+  <h2>Documentation officielle</h2>
+  <a class="res-link" href="https://man7.org/linux/man-pages/man7/hier.7.html" target="_blank" rel="noopener">
+    <div class="res-title">man hier — hiérarchie du système de fichiers Linux</div>
+    <div class="res-desc">Page de manuel officielle décrivant en détail le rôle de chaque répertoire standard.</div>
+    <div class="res-url">man7.org</div>
+  </a>
+  <a class="res-link" href="https://www.gnu.org/software/coreutils/manual/coreutils.html" target="_blank" rel="noopener">
+    <div class="res-title">GNU Coreutils Manual</div>
+    <div class="res-desc">Documentation officielle des commandes de base : ls, cp, mv, rm, mkdir, etc.</div>
+    <div class="res-url">gnu.org</div>
+  </a>
+
+  <h2>Chaînes / vidéos de référence</h2>
+  <a class="res-link" href="https://www.youtube.com/results?search_query=syst%C3%A8me+de+fichiers+linux+tutoriel+fran%C3%A7ais" target="_blank" rel="noopener">
+    <div class="res-title">Recherche YouTube — Linux et systèmes de fichiers en français</div>
+    <div class="res-desc">Recherche préconfigurée pour trouver des tutoriels vidéo récents en français.</div>
+    <div class="res-url">youtube.com</div>
+  </a>
+
+  <h2>Aide-mémoire rapide</h2>
+  <div class="grid grid-2">
+    <div class="card"><h4><code>/, /bin, /etc, /home, /var</code></h4><p>Répertoires standards de l'arborescence</p></div>
+    <div class="card"><h4><code>pwd, cd, .  ..</code></h4><p>Se repérer et se déplacer</p></div>
+    <div class="card"><h4><code>ls -la</code></h4><p>Lister, y compris les fichiers cachés, en détail</p></div>
+    <div class="card"><h4><code>mkdir -p / rm -r</code></h4><p>Créer / supprimer récursivement</p></div>
+    <div class="card"><h4><code>cp / mv</code></h4><p>Copier / déplacer ou renommer</p></div>
+    <div class="card"><h4><code>-, d, l, c, b, s, p</code></h4><p>Types de fichiers dans ls -l</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>Mini-site généré pour révision BTS CIEL — Système de fichiers Linux</footer>
+
+<script>
+/* ---------- navigation ---------- */
+const tabs = document.querySelectorAll('nav.tabs button');
+const pages = document.querySelectorAll('section.page');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    pages.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.page).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------- terminal simulator ---------- */
+function makeFS(){
+  return {
+    type:'dir', children:{
+      home:{ type:'dir', children:{
+        toto:{ type:'dir', children:{
+          '.profile':{type:'file', content:''},
+          'mbox':{type:'file', content:''},
+          'main.cxx':{type:'file', content:'int main(){return 0;}'},
+          'rep1':{type:'dir', children:{ 'fic1':{type:'file', content:'contenu de fic1'} }},
+          'mail':{type:'dir', children:{ 'toto':{type:'file', content:''} }}
+        }}
+      }},
+      bin:{type:'dir', children:{}},
+      etc:{type:'dir', children:{}},
+      var:{type:'dir', children:{}},
+      tmp:{type:'dir', children:{}}
+    }
+  };
+}
+let fsRoot = makeFS();
+let cwd = ['home','toto'];
+let prevCwd = ['home','toto'];
+
+function getNode(pathArr){
+  let node = fsRoot;
+  for(const part of pathArr){
+    if(!node || node.type !== 'dir' || !node.children[part]) return null;
+    node = node.children[part];
+  }
+  return node;
+}
+function resolvePath(input){
+  if(!input) return cwd.slice();
+  let parts = input.split('/');
+  let base = input.startsWith('/') ? [] : cwd.slice();
+  for(const p of parts){
+    if(p === '' || p === '.') continue;
+    if(p === '..'){ base.pop(); }
+    else base.push(p);
+  }
+  return base;
+}
+function pathStr(arr){ return '/' + arr.join('/'); }
+function displayPrompt(){
+  const p = cwd.join('/') === 'home/toto' ? '~' : ('/' + cwd.join('/') + (cwd.length?'':'')) ;
+  const shown = (cwd.length===2 && cwd[0]==='home' && cwd[1]==='toto') ? '~' : '/'+cwd.join('/');
+  return `toto@bts-ciel:${shown}$`;
+}
+const outEl = document.getElementById('term-output');
+function printLine(text, cls){
+  const div = document.createElement('div');
+  if(cls) div.className = cls;
+  div.textContent = text;
+  outEl.appendChild(div);
+  outEl.scrollTop = outEl.scrollHeight;
+}
+function printPromptLine(cmd){
+  const div = document.createElement('div');
+  div.className = 'prompt-line';
+  div.textContent = displayPrompt() + ' ' + cmd;
+  outEl.appendChild(div);
+}
+
+function fakeLsLong(name, node){
+  const isDir = node.type === 'dir';
+  const perm = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
+  const links = isDir ? 2 : 1;
+  const size = isDir ? 4096 : (node.content ? node.content.length : 0);
+  return `${perm}  ${links} toto  profs  ${String(size).padStart(5,' ')}  12 sept 10:32  ${name}`;
+}
+
+function runCommand(raw){
+  printPromptLine(raw);
+  const trimmed = raw.trim();
+  if(trimmed === ''){ return; }
+  const args = trimmed.split(/\s+/);
+  const cmd = args[0];
+  const rest = args.slice(1);
+  const flags = rest.filter(a => a.startsWith('-'));
+  const nonFlags = rest.filter(a => !a.startsWith('-'));
+  const flagStr = flags.join('');
+
+  switch(cmd){
+    case 'help':
+      printLine('Commandes : pwd, cd [chemin], ls [-a] [-l] [chemin], mkdir [-p] chemin, rmdir chemin, rm [-r] chemin, cp source dest, mv source dest, cat fichier, clear');
+      break;
+    case 'clear':
+      outEl.innerHTML = '';
+      break;
+    case 'pwd':
+      printLine(pathStr(cwd));
+      break;
+    case 'cd': {
+      let target = nonFlags[0];
+      let newCwd;
+      if(!target){ newCwd = ['home','toto']; }
+      else if(target === '-'){ newCwd = prevCwd.slice(); }
+      else { newCwd = resolvePath(target); }
+      const node = getNode(newCwd);
+      if(!node || node.type !== 'dir'){
+        printLine(`cd: ${target || ''}: Aucun fichier ou dossier de ce type`, 'err');
+      }else{
+        prevCwd = cwd.slice();
+        cwd = newCwd;
+      }
+      break;
+    }
+    case 'ls': {
+      const target = nonFlags[0] ? resolvePath(nonFlags[0]) : cwd;
+      const node = getNode(target);
+      if(!node){ printLine(`ls: impossible d'accéder à '${nonFlags[0]}': Aucun fichier ou dossier de ce type`, 'err'); break; }
+      if(node.type !== 'dir'){ printLine(nonFlags[0] || ''); break; }
+      let names = Object.keys(node.children);
+      if(!flagStr.includes('a')) names = names.filter(n => !n.startsWith('.'));
+      names.sort();
+      if(names.length === 0){ break; }
+      if(flagStr.includes('l')){
+        names.forEach(n => printLine(fakeLsLong(n, node.children[n])));
+      }else{
+        printLine(names.join('  '));
+      }
+      break;
+    }
+    case 'mkdir': {
+      if(nonFlags.length === 0){ printLine('mkdir: opérande manquant', 'err'); break; }
+      nonFlags.forEach(target => {
+        const parts = resolvePath(target);
+        const name = parts.pop();
+        let parentNode;
+        if(flagStr.includes('p')){
+          let cursor = fsRoot;
+          for(const part of parts){
+            if(!cursor.children[part]) cursor.children[part] = {type:'dir', children:{}};
+            cursor = cursor.children[part];
+          }
+          parentNode = cursor;
+        }else{
+          parentNode = getNode(parts);
+        }
+        if(!parentNode || parentNode.type !== 'dir'){
+          printLine(`mkdir: impossible de créer le répertoire '${target}': Aucun fichier ou dossier de ce type`, 'err');
+        }else if(parentNode.children[name]){
+          printLine(`mkdir: impossible de créer le répertoire '${target}': Le fichier existe déjà`, 'err');
+        }else{
+          parentNode.children[name] = {type:'dir', children:{}};
+          if(flagStr.includes('v')) printLine(`mkdir: répertoire '${target}' créé`);
+        }
+      });
+      break;
+    }
+    case 'rmdir': {
+      nonFlags.forEach(target => {
+        const parts = resolvePath(target);
+        const name = parts.pop();
+        const parentNode = getNode(parts);
+        if(!parentNode || !parentNode.children[name]){
+          printLine(`rmdir: impossible de supprimer '${target}': Aucun fichier ou dossier de ce type`, 'err');
+        }else if(parentNode.children[name].type !== 'dir'){
+          printLine(`rmdir: échec de suppression de '${target}': N'est pas un répertoire`, 'err');
+        }else if(Object.keys(parentNode.children[name].children).length > 0){
+          printLine(`rmdir: impossible de supprimer '${target}': Le répertoire n'est pas vide`, 'err');
+        }else{
+          delete parentNode.children[name];
+        }
+      });
+      break;
+    }
+    case 'rm': {
+      nonFlags.forEach(target => {
+        const parts = resolvePath(target);
+        const name = parts.pop();
+        const parentNode = getNode(parts);
+        if(!parentNode || !parentNode.children[name]){
+          printLine(`rm: impossible de supprimer '${target}': Aucun fichier ou dossier de ce type`, 'err');
+        }else if(parentNode.children[name].type === 'dir' && !flagStr.includes('r')){
+          printLine(`rm: impossible de supprimer '${target}': est un répertoire (utilisez -r)`, 'err');
+        }else{
+          delete parentNode.children[name];
+          if(flagStr.includes('v')) printLine(`rm: '${target}' supprimé`);
+        }
+      });
+      break;
+    }
+    case 'cat': {
+      const target = nonFlags[0];
+      if(!target){ printLine('cat: opérande manquant', 'err'); break; }
+      const parts = resolvePath(target);
+      const node = getNode(parts);
+      if(!node){ printLine(`cat: ${target}: Aucun fichier ou dossier de ce type`, 'err'); }
+      else if(node.type === 'dir'){ printLine(`cat: ${target}: est un dossier`, 'err'); }
+      else{ printLine(node.content || '(fichier vide)'); }
+      break;
+    }
+    case 'cp': {
+      if(nonFlags.length < 2){ printLine('cp: source et destination requises', 'err'); break; }
+      const dest = nonFlags[nonFlags.length-1];
+      const sources = nonFlags.slice(0, -1);
+      sources.forEach(src => {
+        const srcParts = resolvePath(src);
+        const srcName = srcParts[srcParts.length-1];
+        const srcNode = getNode(srcParts);
+        if(!srcNode){ printLine(`cp: impossible d'évaluer '${src}': Aucun fichier ou dossier de ce type`, 'err'); return; }
+        if(srcNode.type === 'dir' && !flagStr.includes('r')){ printLine(`cp: -r non spécifié; '${src}' est un répertoire`, 'err'); return; }
+        let destParts = resolvePath(dest);
+        const destNode = getNode(destParts);
+        let finalParentParts, finalName;
+        if(destNode && destNode.type === 'dir'){ finalParentParts = destParts; finalName = srcName; }
+        else{ finalParentParts = destParts.slice(0,-1); finalName = destParts[destParts.length-1]; }
+        const parentNode = getNode(finalParentParts);
+        if(!parentNode || parentNode.type !== 'dir'){ printLine(`cp: destination invalide`, 'err'); return; }
+        parentNode.children[finalName] = JSON.parse(JSON.stringify(srcNode));
+      });
+      break;
+    }
+    case 'mv': {
+      if(nonFlags.length < 2){ printLine('mv: source et destination requises', 'err'); break; }
+      const dest = nonFlags[nonFlags.length-1];
+      const sources = nonFlags.slice(0, -1);
+      sources.forEach(src => {
+        const srcParts = resolvePath(src);
+        const srcName = srcParts[srcParts.length-1];
+        const srcParentParts = srcParts.slice(0,-1);
+        const srcParent = getNode(srcParentParts);
+        if(!srcParent || !srcParent.children[srcName]){ printLine(`mv: impossible d'évaluer '${src}': Aucun fichier ou dossier de ce type`, 'err'); return; }
+        const srcNode = srcParent.children[srcName];
+        let destParts = resolvePath(dest);
+        const destNode = getNode(destParts);
+        let finalParentParts, finalName;
+        if(destNode && destNode.type === 'dir'){ finalParentParts = destParts; finalName = srcName; }
+        else{ finalParentParts = destParts.slice(0,-1); finalName = destParts[destParts.length-1]; }
+        const parentNode = getNode(finalParentParts);
+        if(!parentNode || parentNode.type !== 'dir'){ printLine(`mv: destination invalide`, 'err'); return; }
+        parentNode.children[finalName] = srcNode;
+        delete srcParent.children[srcName];
+      });
+      break;
+    }
+    default:
+      printLine(`${cmd} : commande introuvable. Tapez 'help' pour la liste des commandes disponibles.`, 'err');
+  }
+}
+
+const termInput = document.getElementById('term-input');
+const termPromptLive = document.getElementById('term-prompt-live');
+function refreshPromptLive(){ termPromptLive.textContent = displayPrompt(); }
+termInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    const val = termInput.value;
+    runCommand(val);
+    termInput.value = '';
+    refreshPromptLive();
+  }
+});
+printLine("Bienvenue ! Tapez 'help' pour voir les commandes disponibles. Vous êtes dans /home/toto.");
+refreshPromptLive();
+
+/* ---------- exercices ---------- */
+const exercices = [
+  {
+    level:"Niveau 1",
+    title:"Chemin absolu du répertoire personnel",
+    statement:"En partant de la racine, quelle est la référence absolue du répertoire <code>toto</code> situé dans <code>home</code> ?",
+    solution:"<pre class=\"code\">/home/toto</pre><p>Une référence absolue part toujours de la racine <code>/</code> et énumère chaque répertoire traversé jusqu'à la cible.</p>"
+  },
+  {
+    level:"Niveau 1",
+    title:"Chemin absolu d'un fichier imbriqué",
+    statement:"Toujours dans l'arborescence de <code>toto</code>, quelle est la référence absolue du fichier <code>fic1</code> situé dans le répertoire <code>rep1</code> ?",
+    solution:"<pre class=\"code\">/home/toto/rep1/fic1</pre>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Chemins relatifs depuis /home/toto",
+    statement:"Sachant que <code>pwd</code> renvoie <code>/home/toto</code>, donnez la référence relative des fichiers <code>.profile</code>, <code>mbox</code> et <code>main.cxx</code>.",
+    solution:"<pre class=\"code\">.profile\nmbox\nmain.cxx</pre><p>Ces trois fichiers sont directement dans le répertoire courant : leur référence relative est simplement leur nom (on peut aussi écrire <code>./mbox</code> de façon équivalente).</p>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Chemins relatifs vers des sous-répertoires",
+    statement:"Toujours depuis <code>/home/toto</code>, donnez la référence relative du fichier <code>fic1</code> (dans <code>rep1</code>) puis du fichier <code>toto</code> (dans <code>mail</code>).",
+    solution:"<pre class=\"code\">rep1/fic1\nmail/toto</pre>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Lire une ligne de ls -l",
+    statement:"Que signifie chaque champ de la ligne suivante ? <pre class=\"code\">-rw-r--r--  1 cpb  prof   1240  12 sept 10:32  fic1</pre>",
+    solution:"<p><code>-</code> : fichier ordinaire. <code>rw-r--r--</code> : permissions (lecture/écriture pour le propriétaire, lecture seule pour le groupe et les autres). <code>1</code> : un seul lien physique. <code>cpb</code> : utilisateur propriétaire. <code>prof</code> : groupe propriétaire. <code>1240</code> : taille en octets. <code>12 sept 10:32</code> : date de dernière modification. <code>fic1</code> : nom du fichier.</p>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"Numérotation complète des partitions",
+    statement:"Un disque contient, dans l'ordre de création : 2 partitions primaires, puis 1 partition étendue contenant 3 lecteurs logiques, puis une dernière partition primaire. Donnez la numérotation complète de toutes les partitions (<code>sdaX</code>).",
+    solution:"<p><code>sda1</code> et <code>sda2</code> : les deux premières partitions primaires.<br><code>sda3</code> : la partition étendue elle-même.<br><code>sda5</code>, <code>sda6</code>, <code>sda7</code> : les trois lecteurs logiques à l'intérieur de l'étendue (numérotation à partir de 5).<br><code>sda4</code> : la dernière partition primaire.</p>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"Enchaînement de commandes",
+    statement:"Écrivez la suite de commandes permettant de : créer un répertoire <code>projet/src</code> (avec ses parents si besoin), y copier récursivement le contenu du répertoire <code>rep1</code>, puis lister le contenu de <code>projet</code> en détail, y compris les fichiers cachés.",
+    solution:"<pre class=\"code\">mkdir -p projet/src\ncp -r rep1 projet/src/\nls -la projet</pre>"
+  },
+  {
+    level:"Bonus — hors programme",
+    title:"Lien physique vs lien symbolique",
+    statement:"Expliquez la différence entre un lien physique et un lien symbolique, et donnez la commande pour créer chacun d'eux à partir d'un fichier <code>fic1</code>.",
+    solution:"<pre class=\"code\">ln fic1 fic1_hardlink      <span class=\"c1\"># lien physique : même inode que fic1</span>\nln -s fic1 fic1_symlink    <span class=\"c1\"># lien symbolique : fichier séparé qui pointe vers fic1</span></pre><p>Un lien physique partage directement les données de fic1 (même inode) : supprimer fic1 ne supprime pas les données tant que le lien physique existe. Un lien symbolique est un fichier à part qui contient juste le chemin vers fic1 : si fic1 est supprimé, le lien symbolique devient invalide (\"lien brisé\").</p>"
+  }
+];
+const exoList = document.getElementById('exo-list');
+exercices.forEach((ex)=>{
+  const acc = document.createElement('div');
+  acc.className = 'accordion';
+  acc.innerHTML = `
+    <div class="acc-head">
+      <span><span class="lvl">${ex.level}</span>${ex.title}</span>
+      <span class="acc-arrow">▶</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>${ex.statement}</p>
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;color:var(--amber);font-family:var(--mono);font-size:.85rem;">Voir la solution</summary>
+          <div style="margin-top:10px;">${ex.solution}</div>
+        </details>
+      </div>
+    </div>`;
+  acc.querySelector('.acc-head').addEventListener('click', ()=>acc.classList.toggle('open'));
+  exoList.appendChild(acc);
+});
+
+/* ---------- flashcards ---------- */
+const flashcards = [
+  {q:"Que signifie « sous UNIX, tout est fichier » ?", a:"Chaque périphérique (souris, disque, imprimante...) est représenté par un fichier spécial : lire/écrire ce fichier revient à communiquer avec le périphérique."},
+  {q:"Différence entre partition primaire et partition étendue ?", a:"La primaire existe physiquement sur le disque (limitée à 4). L'étendue est « simulée » à l'intérieur d'une partition primaire et peut contenir des lecteurs logiques."},
+  {q:"Quelle table de partitionnement remplace le MBR, et pourquoi ?", a:"La table GPT, car elle gère jusqu'à 128 partitions et les disques de grande capacité, contrairement au MBR limité à 4 partitions primaires."},
+  {q:"Que contient le répertoire /etc ?", a:"Les fichiers de configuration du système."},
+  {q:"Que contient le répertoire /home ?", a:"Les fichiers personnels des utilisateurs, un sous-répertoire par utilisateur."},
+  {q:"Différence entre notation absolue et relative d'un chemin ?", a:"L'absolue part de la racine /. La relative part du répertoire de travail courant (donné par pwd)."},
+  {q:"Que représentent '.' et '..' ?", a:"'.' représente le répertoire courant. '..' représente le répertoire parent."},
+  {q:"Que fait la commande mount ?", a:"Elle intègre le système de fichiers d'une partition dans un répertoire existant (le point de montage) de l'arborescence principale."},
+  {q:"Différence entre un fichier de périphérique en mode caractère et en mode bloc ?", a:"Mode caractère : transfert d'un octet à la fois (clavier, souris). Mode bloc : transfert de plusieurs octets à des emplacements précis (disque dur, clé USB)."},
+  {q:"Quelle option de mkdir crée les répertoires parents manquants ?", a:"L'option -p."},
+  {q:"Quelle option de ls affiche aussi les fichiers cachés ?", a:"L'option -a."},
+  {q:"Que fait rm -r sur un répertoire ?", a:"Il supprime le répertoire et tout son contenu (sous-répertoires et fichiers) de façon récursive."}
+];
+let flashIndex = 0, flipped = false;
+const flashCardEl = document.getElementById('flash-card');
+const flashFront = document.getElementById('flash-front-text');
+const flashBack = document.getElementById('flash-back-text');
+const flashCount = document.getElementById('flash-count');
+function renderFlash(){
+  flashFront.textContent = flashcards[flashIndex].q;
+  flashBack.textContent = flashcards[flashIndex].a;
+  flashCount.textContent = `${flashIndex+1} / ${flashcards.length}`;
+  flashCardEl.classList.remove('flipped');
+  flipped = false;
+}
+flashCardEl.addEventListener('click', ()=>{
+  flipped = !flipped;
+  flashCardEl.classList.toggle('flipped', flipped);
+});
+document.getElementById('flash-next').addEventListener('click', ()=>{
+  flashIndex = (flashIndex+1) % flashcards.length;
+  renderFlash();
+});
+document.getElementById('flash-prev').addEventListener('click', ()=>{
+  flashIndex = (flashIndex-1+flashcards.length) % flashcards.length;
+  renderFlash();
+});
+renderFlash();
+
+/* ---------- QCM ---------- */
+const qcm = [
+  {q:"Sous Linux, comment s'appelle le point d'entrée unique de l'arborescence ?", options:["C:\\","/", "~", "root:"], correct:1},
+  {q:"Combien de partitions primaires peut-on créer au maximum avec une table MBR ?", options:["2","4","8","128"], correct:1},
+  {q:"Quel répertoire contient les fichiers de configuration du système ?", options:["/home","/etc","/var","/bin"], correct:1},
+  {q:"Quelle commande affiche le répertoire de travail courant ?", options:["cd","ls","pwd","cwd"], correct:2},
+  {q:"Que représente '..' dans un chemin ?", options:["Le répertoire courant","Le répertoire parent","La racine","Le répertoire personnel"], correct:1},
+  {q:"Quel type de fichier de périphérique représente un disque dur ?", options:["Mode caractère","Mode bloc","Mode socket","Mode pipe"], correct:1},
+  {q:"Quelle commande permet d'intégrer une partition dans l'arborescence principale ?", options:["mount","cd","attach","link"], correct:0},
+  {q:"Dans ls -l, quel caractère indique un répertoire ?", options:["-","d","l","c"], correct:1},
+  {q:"Quelle option de rm permet de supprimer un répertoire et son contenu ?", options:["-a","-l","-r","-v"], correct:2},
+  {q:"Quel système de fichiers est spécifique à Linux (parmi les propositions) ?", options:["NTFS","FAT","Ext4","iso9660"], correct:2}
+];
+const qcmList = document.getElementById('qcm-list');
+qcm.forEach((item,qi)=>{
+  const div = document.createElement('div');
+  div.className = 'qcm-q';
+  div.innerHTML = `<p class="question">${qi+1}. ${item.q}</p>` +
+    item.options.map((opt,oi)=>`
+      <label class="qcm-opt">
+        <input type="radio" name="q${qi}" value="${oi}">
+        <span>${opt}</span>
+      </label>`).join('') +
+    `<div class="qcm-feedback" id="fb-${qi}"></div>`;
+  qcmList.appendChild(div);
+});
+document.getElementById('qcm-submit').addEventListener('click', ()=>{
+  let score = 0;
+  qcm.forEach((item,qi)=>{
+    const checked = document.querySelector(`input[name="q${qi}"]:checked`);
+    const fb = document.getElementById(`fb-${qi}`);
+    if(!checked){
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = 'Aucune réponse sélectionnée.';
+      return;
+    }
+    if(parseInt(checked.value) === item.correct){
+      score++;
+      fb.className = 'qcm-feedback ok';
+      fb.textContent = '✓ Bonne réponse';
+    }else{
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = '✗ Réponse attendue : ' + item.options[item.correct];
+    }
+  });
+  const scoreEl = document.getElementById('qcm-score');
+  scoreEl.style.display = 'block';
+  scoreEl.innerHTML = `Score : ${score} / ${qcm.length} ${score===qcm.length ? '🎉' : ''}`;
+  scoreEl.scrollIntoView({behavior:'smooth', block:'center'});
+});
+</script>
+</body>
+</html>

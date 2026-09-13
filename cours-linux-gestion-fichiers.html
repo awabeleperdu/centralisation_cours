@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gérer les fichiers sous Linux — Cours interactif BTS CIEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d12; --panel:#11161d; --panel-2:#161c25; --border:#232b37;
+  --text:#d5dbe3; --text-dim:#7c8798; --amber:#e3b341; --green:#7ee787;
+  --red:#ff7b72; --blue:#58a6ff; --purple:#c9a6ff;
+  --mono:'JetBrains Mono', ui-monospace, monospace; --sans:'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;}
+::selection{background:var(--amber);color:#0a0d12;}
+
+header.topbar{position:sticky;top:0;z-index:50;background:rgba(10,13,18,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.brand{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:8px;}
+.brand .dot{color:var(--amber);}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
+nav.tabs button{font-family:var(--mono);font-size:.82rem;background:none;border:1px solid transparent;color:var(--text-dim);padding:7px 12px;border-radius:6px;cursor:pointer;transition:.15s;}
+nav.tabs button:hover{color:var(--text);border-color:var(--border);}
+nav.tabs button.active{color:var(--bg);background:var(--amber);font-weight:600;}
+
+main{max-width:1100px;margin:0 auto;padding:32px 20px 80px;}
+section.page{display:none;animation:fade .25s ease;}
+section.page.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+h1{font-size:1.9rem;margin:0 0 6px;color:#fff;letter-spacing:-.01em;}
+h2{font-size:1.35rem;margin:40px 0 14px;color:#fff;border-bottom:1px solid var(--border);padding-bottom:10px;}
+h2:first-of-type{margin-top:0;}
+h3{font-size:1.05rem;color:var(--amber);margin:24px 0 8px;}
+p{color:var(--text);}
+.subtitle{color:var(--text-dim);font-size:1rem;margin-bottom:28px;}
+code, .mono{font-family:var(--mono);}
+code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.88em;color:var(--green);}
+
+pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.65;color:#c9d1d9;margin:10px 0 18px;}
+pre.code .c1{color:var(--text-dim);}
+
+.box{border-left:3px solid;border-radius:6px;padding:12px 16px;margin:16px 0;background:var(--panel);}
+.box-retenir{border-color:var(--green);}
+.box-attention{border-color:var(--red);}
+.box-title{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.03em;margin-bottom:4px;}
+.box-retenir .box-title{color:var(--green);}
+.box-attention .box-title{color:var(--red);}
+
+.toc-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:0 0 30px;}
+.toc-title{font-family:var(--mono);font-size:.75rem;color:var(--text-dim);letter-spacing:.03em;margin-bottom:10px;}
+.toc-box a{display:inline-block;color:var(--blue);text-decoration:none;font-size:.85rem;margin:0 14px 8px 0;font-family:var(--mono);}
+.toc-box a:hover{text-decoration:underline;}
+.badge-plus{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--purple);border:1px solid #6e4fa3;background:rgba(160,120,255,.1);padding:1px 8px;border-radius:20px;vertical-align:middle;letter-spacing:.02em;}
+.plus-divider{display:flex;align-items:center;gap:12px;margin:44px 0 10px;color:var(--text-dim);font-family:var(--mono);font-size:.78rem;}
+.plus-divider::before,.plus-divider::after{content:"";flex:1;height:1px;background:var(--border);}
+
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.card h4{margin:0 0 6px;font-size:.95rem;color:#fff;}
+.card p{margin:0;color:var(--text-dim);font-size:.88rem;}
+
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.86rem;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+th{color:var(--text-dim);font-weight:600;font-family:var(--mono);font-size:.76rem;}
+td code{white-space:nowrap;}
+
+.mindmap{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+.mm-row{display:flex;gap:10px;flex-wrap:wrap;}
+.mm-node{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;}
+.mm-node.root{background:var(--amber);color:#0a0d12;font-weight:700;border:none;}
+
+.accordion{border:1px solid var(--border);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--panel);}
+.acc-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;cursor:pointer;font-size:.92rem;color:var(--text);}
+.acc-head:hover{background:var(--panel-2);}
+.acc-head .lvl{font-family:var(--mono);font-size:.72rem;color:var(--amber);border:1px solid var(--amber);padding:1px 7px;border-radius:20px;margin-right:10px;}
+.acc-arrow{transition:.2s;color:var(--text-dim);}
+.accordion.open .acc-arrow{transform:rotate(90deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:1px solid transparent;}
+.accordion.open .acc-body{max-height:1000px;border-top:1px solid var(--border);}
+.acc-body-inner{padding:14px 16px;}
+
+.flash-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flash-card{width:100%;max-width:480px;height:220px;perspective:1200px;cursor:pointer;}
+.flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+.flash-card.flipped .flash-inner{transform:rotateY(180deg);}
+.flash-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;border:1px solid var(--border);}
+.flash-front{background:var(--panel);}
+.flash-back{background:var(--panel-2);transform:rotateY(180deg);color:var(--green);}
+.flash-face p{font-size:1.05rem;font-family:var(--mono);margin:0;}
+.flash-controls{display:flex;gap:12px;align-items:center;}
+.flash-count{color:var(--text-dim);font-family:var(--mono);font-size:.85rem;}
+
+button.btn{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:7px;cursor:pointer;font-size:.85rem;transition:.15s;}
+button.btn:hover{border-color:var(--amber);color:var(--amber);}
+button.btn.primary{background:var(--amber);color:#0a0d12;border:none;font-weight:700;}
+button.btn.primary:hover{opacity:.9;color:#0a0d12;}
+
+.qcm-q{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+.qcm-q p.question{margin:0 0 10px;font-weight:600;color:#fff;}
+.qcm-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:4px;}
+.qcm-opt:hover{background:var(--panel-2);}
+.qcm-opt input{accent-color:var(--amber);}
+.qcm-feedback{display:none;font-size:.85rem;margin-top:8px;padding:8px 10px;border-radius:6px;font-family:var(--mono);}
+.qcm-feedback.ok{background:rgba(126,231,135,.1);color:var(--green);display:block;}
+.qcm-feedback.ko{background:rgba(255,123,114,.1);color:var(--red);display:block;}
+#qcm-score{text-align:center;font-family:var(--mono);font-size:1.3rem;padding:20px;border:1px solid var(--border);border-radius:10px;background:var(--panel);display:none;margin-top:20px;}
+
+.term-wrap{background:#0d1117;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:20px 0;}
+.term-topbar{background:var(--panel-2);padding:8px 14px;font-family:var(--mono);font-size:.75rem;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.term-dots{display:flex;gap:6px;}
+.term-dots span{width:9px;height:9px;border-radius:50%;background:#3a4150;}
+#term-output{height:300px;overflow-y:auto;padding:14px 16px;font-family:var(--mono);font-size:.83rem;color:#c9d1d9;white-space:pre-wrap;word-break:break-word;}
+#term-output .prompt-line{color:var(--green);}
+#term-output .err{color:var(--red);}
+.term-input-row{display:flex;align-items:center;padding:8px 16px;border-top:1px solid var(--border);background:#0d1117;}
+.term-prompt-live{font-family:var(--mono);font-size:.83rem;color:var(--green);white-space:nowrap;margin-right:6px;}
+#term-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:.83rem;}
+.term-hint{color:var(--text-dim);font-size:.78rem;margin-top:8px;}
+
+.res-link{display:block;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:var(--text);transition:.15s;}
+.res-link:hover{border-color:var(--amber);}
+.res-link .res-title{color:#fff;font-weight:600;font-size:.95rem;}
+.res-link .res-desc{color:var(--text-dim);font-size:.83rem;margin-top:3px;}
+.res-link .res-url{font-family:var(--mono);color:var(--blue);font-size:.78rem;margin-top:4px;}
+
+footer{text-align:center;color:var(--text-dim);font-size:.8rem;padding:30px 20px;font-family:var(--mono);}
+
+@media(max-width:640px){
+  .topbar-inner{flex-direction:column;align-items:flex-start;}
+  nav.tabs{width:100%;overflow-x:auto;}
+  h1{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">$ <span class="dot">chmod 755 /cours</span></div>
+    <nav class="tabs">
+      <button data-page="accueil" class="active">Accueil</button>
+      <button data-page="cours">Le Cours</button>
+      <button data-page="exercices">Exercices</button>
+      <button data-page="revisions">Révisions</button>
+      <button data-page="ressources">Ressources</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= ACCUEIL ================= -->
+<section class="page active" id="accueil">
+  <h1>Gérer les fichiers sous Linux</h1>
+  <p class="subtitle">Types de fichiers, arborescence, chemins, commandes de gestion et permissions — le cours complet BTS CIEL, en approfondissement du cours "Système de fichiers".</p>
+
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Ce cours reprend et approfondit la notion de système de fichiers avec un objectif précis : savoir <strong>désigner</strong> n'importe quel fichier sans ambiguïté (chemins), le <strong>manipuler</strong> (créer, copier, déplacer, supprimer) et comprendre qui a le <strong>droit</strong> de le faire (permissions).
+  </div>
+
+  <h2>Objectifs du cours</h2>
+  <div class="grid grid-3">
+    <div class="card"><h4>Connaître les 7 types de fichiers</h4><p>Ordinaires, répertoires, et 5 types spéciaux.</p></div>
+    <div class="card"><h4>Maîtriser les chemins</h4><p>Absolu, relatif, répertoires . et ..</p></div>
+    <div class="card"><h4>Comprendre le stockage</h4><p>Partitions, montage, blocs logiques/physiques.</p></div>
+    <div class="card"><h4>Utiliser les commandes de gestion</h4><p>ls, mkdir, cp, mv, rm, df, du, quota.</p></div>
+    <div class="card"><h4>Comprendre les permissions</h4><p>Propriétaire, groupe, autres, lecture/écriture/exécution.</p></div>
+    <div class="card"><h4>Manipuler chmod, umask, chown</h4><p>Modes absolu et symbolique, masque de création.</p></div>
+  </div>
+
+  <h2>Prérequis</h2>
+  <ul>
+    <li>Idéalement, avoir vu le cours "Système de fichiers sous Linux" (arborescence, notions de base)</li>
+    <li>Savoir ouvrir un terminal et taper une commande simple</li>
+  </ul>
+
+  <h2>Carte mentale du cours</h2>
+  <div class="mindmap">
+    <div class="mm-row"><div class="mm-node root">Gérer les fichiers</div></div>
+    <div class="mm-row">
+      <div class="mm-node">Types de fichiers<br><span style="color:var(--text-dim);font-size:.78rem">ordinaire, répertoire, spéciaux</span></div>
+      <div class="mm-node">Arborescence & noms<br><span style="color:var(--text-dim);font-size:.78rem">racine, casse, fichiers cachés</span></div>
+      <div class="mm-node">Chemins<br><span style="color:var(--text-dim);font-size:.78rem">absolu, relatif, . et ..</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Disques & partitions<br><span style="color:var(--text-dim);font-size:.78rem">montage, blocs, FS</span></div>
+      <div class="mm-node">Commandes de gestion<br><span style="color:var(--text-dim);font-size:.78rem">ls, mkdir, cp, mv, rm</span></div>
+      <div class="mm-node">Espace disque<br><span style="color:var(--text-dim);font-size:.78rem">df, du, quota</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Permissions<br><span style="color:var(--text-dim);font-size:.78rem">propriétaire, groupe, autres</span></div>
+      <div class="mm-node">chmod, umask, chown<br><span style="color:var(--text-dim);font-size:.78rem">octal, symbolique, masque</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COURS ================= -->
+<section class="page" id="cours">
+  <h1>Le cours structuré</h1>
+  <p class="subtitle">Programme du support couvert intégralement (sections 1 à 11), puis des approfondissements signalés <span class="badge-plus">+ hors programme</span> (sections 12 à 14).</p>
+
+  <div class="toc-box">
+    <div class="toc-title">Sommaire</div>
+    <a href="#c1">1. Les types de fichiers</a>
+    <a href="#c2">2. Organisation en arborescence</a>
+    <a href="#c3">3. Références absolues et relatives</a>
+    <a href="#c4">4. Les répertoires . et ..</a>
+    <a href="#c5">5. Disques, partitions, systèmes de fichiers</a>
+    <a href="#c6">6. Navigation : cd et pwd</a>
+    <a href="#c7">7. La commande ls en détail</a>
+    <a href="#c8">8. Créer, copier, déplacer, supprimer</a>
+    <a href="#c9">9. Surveiller l'espace disque</a>
+    <a href="#c10">10. Propriété et permissions : principes</a>
+    <a href="#c11">11. chmod, umask, chgrp, chown</a>
+    <a href="#c12">12. SUID, SGID, sticky bit <span class="badge-plus">+</span></a>
+    <a href="#c13">13. Liens physiques et symboliques <span class="badge-plus">+</span></a>
+    <a href="#c14">14. Les ACL <span class="badge-plus">+</span></a>
+  </div>
+
+  <h2 id="c1">1. Les types de fichiers</h2>
+  <p>Sous Unix, il existe <strong>7 types de fichiers</strong>, regroupés en 3 catégories :</p>
+  <table>
+    <tr><th>Catégorie</th><th>Type(s)</th><th>Rôle</th></tr>
+    <tr><td>Fichiers ordinaires</td><td>1 type</td><td>Texte, code exécutable, données binaires. Unix ne fait aucune supposition sur leur contenu et ignore leur extension.</td></tr>
+    <tr><td>Répertoires</td><td>1 type</td><td>Fichiers dont le rôle est de contenir d'autres fichiers, pour organiser et hiérarchiser le système.</td></tr>
+    <tr><td>Fichiers spéciaux</td><td>5 types</td><td>Lien symbolique, périphérique mode caractère, périphérique mode bloc, socket, tube nommé (FIFO)</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Un fichier sans extension contenant du texte peut très bien être <strong>exécuté</strong> sous Unix : contrairement à Windows, l'extension n'est qu'une convention pour l'utilisateur (et les gestionnaires de fichiers graphiques), elle n'a <strong>aucun rôle</strong> pour le système lui-même.
+  </div>
+  <p>Rappel sur les deux types de fichiers de périphériques :</p>
+  <table>
+    <tr><th>Mode</th><th>Principe</th></tr>
+    <tr><td>Bloc</td><td>Lecture/écriture par blocs d'octets (nombre fixé), à des emplacements précis</td></tr>
+    <tr><td>Caractère</td><td>Lecture/écriture octet par octet, au fur et à mesure</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    « Sous Unix, tout est fichier ! » Cette particularité simplifie l'écriture de programmes : envoyer une page à l'impression ou un message sur le réseau se fait comme une simple écriture dans un fichier ordinaire, le noyau se chargeant du reste.
+  </div>
+
+  <h2 id="c2">2. Organisation en arborescence</h2>
+  <p>Les répertoires organisent les fichiers en une hiérarchie <strong>arborescente</strong>. Le répertoire <code>/</code> (racine) est immuable et ne peut être placé dans un autre répertoire. Sous Unix, il n'existe pas d'unité de disque comme <code>C:</code> ou <code>D:</code> : les disques/partitions apparaissent comme des répertoires de cette arborescence.</p>
+  <p>Règles de nommage des fichiers :</p>
+  <ul>
+    <li>Tous les caractères sont autorisés, <strong>sauf</strong> le <code>/</code> (slash) ;</li>
+    <li>Le système est <strong>sensible à la casse</strong> : <code>toto</code> et <code>Toto</code> sont deux fichiers différents ;</li>
+    <li>Un fichier est <strong>caché</strong> si son nom commence par un point (ex : <code>.bashrc</code>) — il reste accessible mais n'apparaît que s'il est explicitement demandé.</li>
+  </ul>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    La sensibilité à la casse a des exceptions pour certains systèmes de fichiers, notamment ceux utilisés par la plupart des clés USB et cartes mémoire (FAT/FAT32, voir section 5).
+  </div>
+  <p>La racine contient un certain nombre de répertoires standards, chacun avec un rôle bien défini :</p>
+  <table>
+    <tr><th>Répertoire</th><th>Rôle</th></tr>
+    <tr><td><code>bin</code></td><td>Commandes élémentaires accessibles à tous les utilisateurs</td></tr>
+    <tr><td><code>boot</code></td><td>Fichiers nécessaires à l'amorçage (démarrage) du système</td></tr>
+    <tr><td><code>dev</code></td><td>Fichiers spéciaux de périphériques</td></tr>
+    <tr><td><code>etc</code></td><td>Fichiers de configuration du système</td></tr>
+    <tr><td><code>home</code></td><td>Répertoires personnels des utilisateurs</td></tr>
+    <tr><td><code>lib</code></td><td>Librairies partagées élémentaires et modules du noyau</td></tr>
+    <tr><td><code>media</code></td><td>Points d'apparition des médias amovibles (clé USB, CD/DVD...) lors du branchement</td></tr>
+    <tr><td><code>mnt</code></td><td>Montage temporaire de systèmes de fichiers</td></tr>
+    <tr><td><code>opt</code></td><td>Applications tierces</td></tr>
+    <tr><td><code>proc</code></td><td>Répertoire virtuel (créé par le noyau) : informations et réglages sur les processus et le système</td></tr>
+    <tr><td><code>root</code></td><td>Répertoire personnel de l'administrateur (root)</td></tr>
+    <tr><td><code>sbin</code></td><td>Commandes élémentaires d'administration</td></tr>
+    <tr><td><code>srv</code></td><td>Données des services (notamment réseau) hébergés par le système</td></tr>
+    <tr><td><code>sys</code></td><td>Répertoire virtuel créé par le noyau : informations/réglages système et périphériques</td></tr>
+    <tr><td><code>tmp</code></td><td>Fichiers temporaires, potentiellement supprimés au redémarrage</td></tr>
+    <tr><td><code>usr</code></td><td>Hiérarchie secondaire (bin, lib, sbin...) contenant la majorité des outils non essentiels au démarrage</td></tr>
+    <tr><td><code>var</code></td><td>Données variables : journaux système, files d'impression, boîtes mail...</td></tr>
+  </table>
+
+  <h2 id="c3">3. Références absolues et relatives des fichiers</h2>
+  <p>Le nom d'un fichier n'a de sens que <strong>dans le répertoire où il apparaît</strong> : un même nom (ex : <code>fic1</code>) peut exister dans deux répertoires différents sans lien entre eux. Il faut donc toujours indiquer, d'une manière ou d'une autre, le répertoire dans lequel se trouve le fichier visé. Deux méthodes existent :</p>
+  <table>
+    <tr><th>Référence</th><th>Principe</th><th>Signe distinctif</th></tr>
+    <tr><td>Absolue</td><td>Depuis la racine <code>/</code>, en énumérant les répertoires traversés</td><td>Commence toujours par <code>/</code></td></tr>
+    <tr><td>Relative</td><td>Depuis le répertoire de travail (working directory)</td><td>Ne commence jamais par <code>/</code></td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR — vocabulaire précis</div>
+    On distingue le <strong>chemin d'un fichier</strong> (sa référence absolue ou relative) du <strong>chemin menant à</strong> ce fichier (le chemin du répertoire qui le contient). Si le fichier ciblé se trouve directement dans le répertoire de travail, sa référence relative est simplement <strong>son nom</strong>.
+  </div>
+  <p><strong>Exemple</strong> — référence absolue du répertoire <code>essais</code> : <code>/home/cpb/public/unix/essais</code> (on peut ajouter un <code>/</code> final, ce qui revient au même — mais pas pour un fichier, qui n'est pas un répertoire).</p>
+  <p>Chaque processus (dont un shell interactif) possède un <strong>répertoire de travail</strong>. À l'ouverture d'un terminal, il s'agit initialement du répertoire d'accueil de l'utilisateur. La commande <code>cd</code> permet de le changer (voir section 6).</p>
+
+  <h2 id="c4">4. Les répertoires spéciaux <code>.</code> et <code>..</code></h2>
+  <p>Dans <strong>tout répertoire</strong> existent deux répertoires particuliers :</p>
+  <table>
+    <tr><th>Nom</th><th>Désigne</th></tr>
+    <tr><td><code>.</code> (point)</td><td>Le répertoire qui le contient (son propre répertoire)</td></tr>
+    <tr><td><code>..</code> (point-point)</td><td>Le répertoire parent de son répertoire parent (le "grand-parent")</td></tr>
+  </table>
+  <p>On peut donc désigner le répertoire de travail par un simple point : <code>cp /etc/passwd .</code> copie <code>/etc/passwd</code> dans le répertoire de travail. Le répertoire <code>..</code> de la racine désigne la racine elle-même.</p>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR — une référence n'est jamais unique</div>
+    Avec <code>/home/toto</code> comme répertoire de travail, les références suivantes désignent <strong>toutes</strong> le même fichier <code>mbox</code> de toto :
+    <pre class="code">mbox
+./mbox
+././mbox
+/home/./toto/./mbox
+/./home/toto/mbox</pre>
+  </div>
+
+  <h2 id="c5">5. Disques, partitions et systèmes de fichiers</h2>
+  <p>Les unités de stockage (disques durs, clés USB, CD-ROM...) sont associées à une partie de l'arborescence : une partition est <strong>montée</strong> sur un répertoire existant appelé <strong>point de montage</strong>. La commande <code>mount</code> affiche les montages actifs et permet d'en créer ; <code>umount</code> démonte une partition.</p>
+  <pre class="code">$ mount
+/dev/sda1 on / type ext3 (rw,errors=remount-ro)
+/dev/sda9 on /home type ext3 (rw,usrquota)
+/dev/sda8 on /tmp type ext3 (rw)
+proc on /proc type proc (rw,noexec,nosuid,nodev)</pre>
+  <p>Un système Unix nécessite au minimum deux partitions au démarrage : une pour la racine, et une partition <strong>swap</strong> (échange), réservée à la gestion mémoire du noyau et invisible dans l'arborescence. Les administrateurs créent souvent une partition séparée pour <code>/home</code>, pour préserver les données utilisateurs lors d'une réinstallation du système.</p>
+  <p>Sur un Linux récent, les supports amovibles sont montés automatiquement dans <code>/media</code>. Les montages au démarrage sont configurés dans <code>/etc/fstab</code>. Chaque disque et partition apparaît comme un fichier de périphérique en mode bloc dans <code>/dev</code> (ex : <code>/dev/sda</code>, <code>/dev/sda1</code>...), listés aussi dans <code>/proc/partitions</code>. L'utilitaire <code>fdisk -l</code> affiche (et permet de modifier) la table des partitions.</p>
+  <h3>Formats de systèmes de fichiers</h3>
+  <table>
+    <tr><th>Système</th><th>Caractéristiques</th></tr>
+    <tr><td>FAT</td><td>Ancien (MS-DOS/Windows), noms limités à 8+3 caractères, sans casse</td></tr>
+    <tr><td>FAT32</td><td>Clés USB/cartes mémoire, noms ≤ 255 caractères sans casse, fichiers ≤ 4 Gio, partitions ≤ 2 Tio</td></tr>
+    <tr><td>NTFS</td><td>Windows récent, fichiers ≤ 16 Tio, partitions ≤ 256 Tio</td></tr>
+    <tr><td>ext4</td><td>Linux, fichiers ≤ 16 Tio, partitions ≤ 1 Eio</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — Ko et Kio</div>
+    Officiellement, <strong>Ko</strong> (kilo-octet) désigne 1000 octets (puissance de 10), tandis que <strong>Kio</strong> (kibioctet) désigne 1024 octets (puissance de 2). L'usage informatique confond souvent les deux, ce qui prête à confusion — le support de cours utilise <em>Kio/Mio/Gio/Tio</em> pour rester rigoureux.
+  </div>
+  <p>Un <strong>bloc logique</strong> est la plus petite unité que le système de fichiers alloue pour stocker un fichier : un fichier de 3 octets occupe déjà un bloc logique entier (ex : 1 Kio), et un fichier de 1200 octets en occupe 2. La taille du bloc logique doit être un multiple de la taille du <strong>bloc physique</strong> du disque (souvent 4 Kio aujourd'hui).</p>
+
+  <h2 id="c6">6. Navigation : <code>cd</code> et <code>pwd</code></h2>
+  <p><strong><code>cd</code></strong> (change directory, commande interne) — Synopsis : <code>cd [répertoire]</code></p>
+  <ul>
+    <li><code>cd</code> sans argument : va au répertoire d'accueil de l'utilisateur ;</li>
+    <li><code>cd -</code> : revient au répertoire de travail précédent (avant le <code>cd</code> précédent) ;</li>
+    <li>Sinon, l'argument est une référence (absolue ou relative) vers un répertoire existant.</li>
+  </ul>
+  <pre class="code">toto@allegro:~$ cd projets/bidule
+toto@allegro:~/projets/bidule$ cd /usr/bin
+toto@allegro:/usr/bin$ cd -
+/home/toto/projets/bidule</pre>
+  <p><strong><code>pwd</code></strong> (print working directory, commande interne) — affiche la référence <strong>absolue</strong> du répertoire de travail, sans aucun argument.</p>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Le prompt du shell affiche souvent une indication du répertoire de travail (parfois abrégée, ex : <code>~</code> pour le répertoire d'accueil), mais <code>pwd</code> donne toujours le chemin complet et fiable.
+  </div>
+
+  <h2 id="c7">7. La commande <code>ls</code> en détail</h2>
+  <p>Synopsis complet : <code>ls [-adFhilrRStuU] [--color=(none|always|auto)] {référence}</code></p>
+  <table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>-a</code></td><td>Affiche aussi les fichiers cachés (y compris <code>.</code> et <code>..</code>)</td></tr>
+    <tr><td><code>-l</code></td><td>Affichage détaillé (long)</td></tr>
+    <tr><td><code>-d</code></td><td>Affiche les infos sur le répertoire lui-même, pas son contenu</td></tr>
+    <tr><td><code>-F</code></td><td>Ajoute un symbole selon le type : <code>*</code> exécutable, <code>/</code> répertoire, <code>@</code> lien symbolique, <code>|</code> tube nommé</td></tr>
+    <tr><td><code>-R</code></td><td>Affiche récursivement le contenu des sous-répertoires</td></tr>
+    <tr><td><code>-S</code></td><td>Trie par taille décroissante</td></tr>
+    <tr><td><code>-t</code></td><td>Trie par date de modification (plus récent d'abord)</td></tr>
+    <tr><td><code>-u</code></td><td>Trie par date d'accès plutôt que de modification</td></tr>
+    <tr><td><code>-U</code></td><td>Désactive tout tri (ordre d'apparition dans le répertoire)</td></tr>
+    <tr><td><code>-r</code></td><td>Inverse l'ordre de tri (sauf avec -U)</td></tr>
+    <tr><td><code>--color=auto</code></td><td>Colore les noms selon leur type (nécessite le droit d'exécution sur le répertoire)</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — comprendre -d</div>
+    <code>ls -l un-rep</code> affiche le <strong>contenu</strong> de <code>un-rep</code> avec détails. <code>ls -ld un-rep</code> affiche les détails sur <code>un-rep</code> <strong>lui-même</strong>, pas son contenu. C'est une confusion très fréquente chez les débutants.
+  </div>
+  <h3>Lecture complète d'une ligne <code>ls -l</code></h3>
+  <pre class="code">total 12
+-rw-r--r--  1 cpb  prof   1240  12 sept 10:32  fic1
+drwxr-x-w-  2 cpb  prof   4096  12 sept 10:15  un-rep</pre>
+  <p>La première ligne <code>total ...</code> indique le nombre de blocs occupés par les fichiers affichés (taille de bloc généralement 512 ou 1024 Kio). Chaque ligne suivante contient, dans l'ordre : le type de fichier, les 9 caractères de permissions (section 10-11), le nombre de liens physiques, l'utilisateur propriétaire, le groupe propriétaire, la taille en octets, la date de dernière modification, et le nom.</p>
+
+  <h2 id="c8">8. Créer, copier, déplacer, supprimer</h2>
+  <h3><code>mkdir</code> — créer des répertoires</h3>
+  <p>Synopsis : <code>mkdir [-vp] référence {référence}</code>. Sans <code>-p</code>, tous les répertoires intermédiaires du chemin doivent déjà exister.</p>
+  <h3><code>rmdir</code> — supprimer des répertoires vides</h3>
+  <p>Synopsis : <code>rmdir [-vp] référence {référence}</code>. Avec <code>-p</code>, supprime aussi les répertoires parents s'ils deviennent vides. La suppression, si autorisée, est <strong>irréversible</strong>.</p>
+  <h3><code>cp</code> — copier des fichiers</h3>
+  <p>Synopsis : <code>cp [-adfirpv] source {source} destination</code></p>
+  <table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>-r</code></td><td>Autorise la copie de répertoires et de leur contenu</td></tr>
+    <tr><td><code>-f</code></td><td>Force l'écrasement (supprime la destination avant de copier si besoin)</td></tr>
+    <tr><td><code>-i</code></td><td>Demande confirmation avant d'écraser un fichier</td></tr>
+    <tr><td><code>-p</code></td><td>Conserve propriétaire/groupe, permissions et dates de la source</td></tr>
+    <tr><td><code>-a</code></td><td>Préserve un maximum d'attributs (active aussi <code>-d</code> et <code>-r</code>)</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Un fichier créé par copie appartient à l'utilisateur qui exécute la copie (pas au propriétaire de la source), avec pour permissions celles de la source <strong>moins</strong> celles du masque <code>umask</code> (section 11). Si la destination existe déjà, elle garde son propriétaire, son groupe et ses permissions : seul le contenu change.
+  </div>
+  <h3><code>mv</code> — déplacer ou renommer</h3>
+  <p>Synopsis : <code>mv [-ivf] source {source} destination</code>. Renomme si la destination n'existe pas encore (et qu'il n'y a qu'une source), sinon déplace dans le répertoire destination.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — permissions nécessaires pour mv</div>
+    Pour déplacer/renommer un fichier au sein d'une même partition, il faut le droit d'<strong>écriture et d'exécution</strong> sur les répertoires source ET destination — <strong>aucun droit sur le fichier lui-même n'est requis</strong>. Un déplacement peut ainsi écraser un fichier existant à la destination sans que ses permissions n'entrent en jeu : seules comptent celles du répertoire destination.
+  </div>
+  <h3><code>rm</code> — supprimer des fichiers</h3>
+  <p>Synopsis : <code>rm [-ifrv] référence {référence}</code>. Sans <code>-r</code>, impossible de supprimer un répertoire. <code>-f</code> annule toute demande de confirmation, y compris pour un fichier sans droit d'écriture dont on est propriétaire.</p>
+
+  <h2 id="c9">9. Surveiller l'espace disque : <code>df</code>, <code>du</code>, <code>quota</code></h2>
+  <h3><code>df</code> (disk free) — occupation des systèmes de fichiers</h3>
+  <p>Synopsis : <code>df [-H] {référence}</code>. Affiche, pour chaque système de fichiers monté : son nom, sa taille, les blocs utilisés/disponibles, le pourcentage d'occupation et son point de montage. <code>-H</code> affiche des quantités plus lisibles pour un humain.</p>
+  <h3><code>du</code> (disk usage) — taille de fichiers ou répertoires</h3>
+  <p>Synopsis : <code>du [-askbhc] {référence}</code>. La "taille" d'un répertoire inclut toute son arborescence.</p>
+  <table>
+    <tr><th>Option</th><th>Effet</th></tr>
+    <tr><td><code>-a</code></td><td>Affiche aussi la taille de chaque fichier (pas seulement les répertoires)</td></tr>
+    <tr><td><code>-s</code></td><td>N'affiche que le total pour chaque argument (summarize)</td></tr>
+    <tr><td><code>-h</code></td><td>Affichage lisible (K, M, G)</td></tr>
+    <tr><td><code>-c</code></td><td>Affiche aussi le total cumulé de tous les arguments</td></tr>
+  </table>
+  <h3><code>quota</code> — limite d'occupation disque</h3>
+  <p>Synopsis : <code>quota</code> / <code>quota -u utilisateur</code> / <code>quota -g groupe</code>. Un quota peut limiter le <strong>nombre de blocs</strong> utilisés et/ou le <strong>nombre de fichiers</strong> créés. Seul <code>root</code> peut consulter les quotas d'un autre utilisateur ou groupe.</p>
+
+  <h2 id="c10">10. Propriété et permissions : les principes</h2>
+  <p>Le système vérifie, pour chaque opération demandée sur un fichier, <strong>5 informations</strong> :</p>
+  <ol>
+    <li>L'utilisateur qui tente l'opération ;</li>
+    <li>Ses groupes ;</li>
+    <li>Le propriétaire du fichier ;</li>
+    <li>Le groupe du fichier ;</li>
+    <li>Les permissions du fichier.</li>
+  </ol>
+  <p>Les permissions sont divisées en 3 catégories : les droits du <strong>propriétaire</strong>, ceux des membres du <strong>groupe</strong> du fichier, et ceux des <strong>autres</strong> utilisateurs. Un utilisateur n'utilise que les droits de sa catégorie la <strong>plus spécifique</strong> (propriétaire, sinon groupe, sinon autre) — jamais un cumul.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Le propriétaire d'un fichier peut posséder <strong>moins</strong> de droits dessus qu'un autre utilisateur ! Mais s'il peut y accéder, il reste toujours capable de se redonner les droits qu'il veut (avec <code>chmod</code>).
+  </div>
+  <h3>Sens différent selon fichier ou répertoire</h3>
+  <table>
+    <tr><th>Droit</th><th>Sur un fichier</th><th>Sur un répertoire</th></tr>
+    <tr><td>Lecture (r)</td><td>Lire son contenu</td><td>Lister son contenu (ex : avec <code>ls</code>)</td></tr>
+    <tr><td>Écriture (w)</td><td>Modifier son contenu (n'affecte pas sa suppression)</td><td>Ajouter, supprimer ou renommer un fichier dedans</td></tr>
+    <tr><td>Exécution (x)</td><td>Exécuter le fichier (binaire, ou script si aussi lisible)</td><td>Traverser le répertoire : y entrer, y référencer un fichier, en obtenir les détails</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Sans le droit d'<strong>exécution</strong> sur un répertoire, impossible de le "traverser" : ni <code>cd</code> dedans, ni référencer un fichier dans son arborescence, ni obtenir de détails sur son contenu — même avec le droit de lecture ! Le droit d'écriture sur un répertoire ne sert à rien sans le droit d'exécution associé.
+  </div>
+
+  <h2 id="c11">11. Modifier les permissions : <code>chmod</code>, <code>umask</code>, <code>chgrp</code>, <code>chown</code></h2>
+  <h3><code>chmod</code> — modifier les permissions</h3>
+  <p>Synopsis : <code>chmod [-R] permissions référence {référence}</code>. Il faut être propriétaire du fichier (ou root) pour le faire — aucune permission particulière sur le fichier lui-même n'est nécessaire.</p>
+  <p><strong>Mode absolu (octal)</strong> : <code>permissions</code> est un nombre à 3 chiffres <code>Cu Cg Co</code> (propriétaire, groupe, autres), chacun de 0 à 7, obtenu en sommant <strong>4</strong> (lecture) + <strong>2</strong> (écriture) + <strong>1</strong> (exécution) :</p>
+  <pre class="code">chmod 640 fic1   <span class="c1"># propriétaire: rw- (6), groupe: r-- (4), autres: --- (0)</span>
+chmod 751 rep    <span class="c1"># propriétaire: rwx (7), groupe: r-x (5), autres: --x (1)</span></pre>
+  <p><strong>Mode symbolique</strong> : <code>(qui)(opérateur)(quoi)</code>, répétable en séparant par des virgules (sans espace) :</p>
+  <table>
+    <tr><th>Qui</th><th>Opérateur</th><th>Quoi</th></tr>
+    <tr><td><code>u</code> propriétaire, <code>g</code> groupe, <code>o</code> autres, <code>a</code> tous</td><td><code>+</code> ajoute, <code>-</code> enlève, <code>=</code> fixe exactement</td><td><code>r</code>, <code>w</code>, <code>x</code> (combinables)</td></tr>
+  </table>
+  <pre class="code">chmod u+x script.sh          <span class="c1"># ajoute l'exécution pour le propriétaire</span>
+chmod go=x,u+x fichier       <span class="c1"># groupe et autres n'ont QUE l'exécution ; propriétaire garde ses droits + exécution</span>
+chmod g+r,o= fichier         <span class="c1"># ajoute la lecture au groupe, retire tout aux autres</span></pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Avec le mode symbolique, plusieurs opérations séparées par des virgules s'exécutent <strong>dans l'ordre d'écriture</strong> — l'ordre peut donc changer le résultat final si les opérations se chevauchent.
+  </div>
+  <h3><code>umask</code> — masque de création de fichiers</h3>
+  <p>Synopsis : <code>umask [masque]</code>. Indique, sous forme octale <code>Cu Cg Co</code>, les permissions à <strong>ne pas accorder</strong> lors de la création d'un fichier (rôle inverse de <code>chmod</code>). Le masque ne s'applique qu'à la création, jamais aux fichiers existants, et se transmet du shell aux programmes qu'il lance (mais pas aux autres shells).</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    La plupart des utilitaires créent les fichiers ordinaires avec le mode <code>0666</code> (rw-rw-rw-), jamais avec l'exécution (sauf les compilateurs, en <code>0777</code>). <code>mkdir</code> crée les répertoires en <code>0777</code>. Le masque vient ensuite <strong>retirer</strong> des droits à ce mode initial.
+  </div>
+  <h3><code>chgrp</code> — changer le groupe d'un fichier</h3>
+  <p>Synopsis : <code>chgrp [-fRv] groupe référence {référence}</code>. Le propriétaire peut changer le groupe de son fichier par un groupe dont il est <strong>lui-même membre</strong>. Seul <code>root</code> peut l'attribuer à n'importe quel groupe existant.</p>
+  <h3><code>chown</code> — changer le propriétaire (et le groupe)</h3>
+  <p>Synopsis : <code>chown [-fRv] utilisateur[:[groupe]] référence {référence}</code>. Seul <code>root</code> peut changer le <strong>propriétaire</strong> d'un fichier. Si <code>utilisateur</code> est suivi de <code>:</code>, le groupe change aussi (groupe indiqué, ou groupe primaire de l'utilisateur si omis).</p>
+  <pre class="code">chown bob fic1          <span class="c1"># change seulement le propriétaire</span>
+chown bob: fic1         <span class="c1"># change le propriétaire ET le groupe (groupe primaire de bob)</span>
+chown bob:dev fic1      <span class="c1"># change le propriétaire et fixe le groupe à "dev"</span></pre>
+
+  <h3>🖥️ Terminal simulé — pratiquez les permissions</h3>
+  <p style="color:var(--text-dim);font-size:.88rem;">Vous êtes <code>toto</code>, dans <code>/home/toto</code>. Essayez : <code>ls -l</code>, <code>chmod 755 rep1</code>, <code>chmod u+x,go=r fic1</code>, <code>ls -l rep1</code> pour vérifier le résultat.</p>
+  <div class="term-wrap">
+    <div class="term-topbar">
+      <span class="term-dots"><span></span><span></span><span></span></span>
+      <span>toto@bts-ciel</span>
+    </div>
+    <div id="term-output"></div>
+    <div class="term-input-row">
+      <span class="term-prompt-live" id="term-prompt-live">toto@bts-ciel:~$</span>
+      <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+  <p class="term-hint">Commandes : pwd, cd, ls [-a][-l], mkdir [-p], rmdir, rm [-r], cp, mv, cat, chmod (octal ou symbolique), whoami, clear, help</p>
+
+  <div class="plus-divider"><span>Sections suivantes hors programme du support fourni — pour approfondir</span></div>
+
+  <h2 id="c12">12. Le 4e chiffre de chmod : SUID, SGID, sticky bit <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le support évoque un "4e chiffre" de <code>chmod</code>, placé avant les trois habituels, "vu plus tard". Il s'agit de bits spéciaux :</p>
+  <table>
+    <tr><th>Bit</th><th>Valeur</th><th>Effet</th></tr>
+    <tr><td>SUID</td><td>4</td><td>Sur un exécutable, il s'exécute avec les droits de son <strong>propriétaire</strong> plutôt que ceux de l'utilisateur qui le lance (ex : <code>passwd</code>)</td></tr>
+    <tr><td>SGID</td><td>2</td><td>Sur un exécutable, s'exécute avec les droits du <strong>groupe</strong> propriétaire ; sur un répertoire, les nouveaux fichiers créés dedans héritent de son groupe</td></tr>
+    <tr><td>Sticky bit</td><td>1</td><td>Sur un répertoire partagé en écriture (comme <code>/tmp</code>), seul le propriétaire d'un fichier peut le supprimer, même si d'autres ont le droit d'écriture sur le répertoire</td></tr>
+  </table>
+  <pre class="code">chmod 4755 /usr/bin/passwd   <span class="c1"># SUID + rwxr-xr-x</span>
+chmod 1777 /tmp              <span class="c1"># sticky bit + rwxrwxrwx, comportement réel de /tmp</span></pre>
+
+  <h2 id="c13">13. Liens physiques et liens symboliques : la commande <code>ln</code> <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le support explique que chaque fichier existe sous forme d'un <strong>inode</strong> unique, et qu'un nom n'est qu'une référence vers cet inode (d'où le "nombre de liens physiques" affiché par <code>ls -l</code>). La commande <code>ln</code> permet de créer explicitement de nouvelles références :</p>
+  <pre class="code">ln fic1 fic1_bis        <span class="c1"># lien physique : même inode, même données, compteur de liens +1</span>
+ln -s fic1 raccourci    <span class="c1"># lien symbolique : nouveau fichier (type l) qui pointe vers fic1</span></pre>
+  <p>Supprimer <code>fic1</code> ne supprime pas les données tant qu'un lien physique existe encore ; en revanche, un lien symbolique devient immédiatement invalide ("lien brisé") si sa cible disparaît.</p>
+
+  <h2 id="c14">14. Les listes de contrôle d'accès (ACL) <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le modèle propriétaire/groupe/autres est parfois trop limité (ex : donner un accès précis à un deuxième utilisateur spécifique sans créer de groupe dédié). Les <strong>ACL</strong> (Access Control Lists) permettent des permissions plus fines :</p>
+  <pre class="code">setfacl -m u:bob:rwx fic1   <span class="c1"># donne à l'utilisateur bob, spécifiquement, tous les droits sur fic1</span>
+getfacl fic1                 <span class="c1"># affiche les ACL en vigueur sur fic1</span></pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Un fichier avec des ACL actives affiche un <code>+</code> après ses permissions classiques dans <code>ls -l</code> (ex : <code>rwxr-xr-x+</code>), signalant qu'il faut consulter <code>getfacl</code> pour la liste complète des droits réels.
+  </div>
+</section>
+
+<!-- ================= EXERCICES ================= -->
+<section class="page" id="exercices">
+  <h1>Exercices d'application</h1>
+  <p class="subtitle">Repris directement des exercices du support de cours, puis prolongés avec des cas d'examen sur les permissions.</p>
+  <div id="exo-list"></div>
+</section>
+
+<!-- ================= REVISIONS ================= -->
+<section class="page" id="revisions">
+  <h1>Révisions interactives</h1>
+  <p class="subtitle">Flashcards pour la mémoire, QCM pour valider vos acquis.</p>
+
+  <h2>📇 Flashcards</h2>
+  <div class="flash-wrap">
+    <div class="flash-card" id="flash-card">
+      <div class="flash-inner">
+        <div class="flash-face flash-front"><p id="flash-front-text"></p></div>
+        <div class="flash-face flash-back"><p id="flash-back-text"></p></div>
+      </div>
+    </div>
+    <div class="flash-controls">
+      <button class="btn" id="flash-prev">← Précédent</button>
+      <span class="flash-count" id="flash-count">1 / 10</span>
+      <button class="btn" id="flash-next">Suivant →</button>
+    </div>
+    <p style="color:var(--text-dim);font-size:.85rem;">Cliquez sur la carte pour la retourner</p>
+  </div>
+
+  <h2>✅ QCM final</h2>
+  <div id="qcm-list"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn primary" id="qcm-submit">Valider mes réponses</button>
+  </div>
+  <div id="qcm-score"></div>
+</section>
+
+<!-- ================= RESSOURCES ================= -->
+<section class="page" id="ressources">
+  <h1>Ressources complémentaires</h1>
+  <p class="subtitle">Pour aller plus loin et s'entraîner en continu.</p>
+
+  <h2>Outils interactifs</h2>
+  <a class="res-link" href="https://explainshell.com" target="_blank" rel="noopener">
+    <div class="res-title">explainshell.com</div>
+    <div class="res-desc">Colle n'importe quelle commande (ex : un chmod complexe) pour voir chaque option expliquée.</div>
+    <div class="res-url">explainshell.com</div>
+  </a>
+  <a class="res-link" href="https://overthewire.org/wargames/bandit/" target="_blank" rel="noopener">
+    <div class="res-title">OverTheWire — Bandit</div>
+    <div class="res-desc">Wargame progressif pour pratiquer les commandes Linux, y compris la gestion des permissions.</div>
+    <div class="res-url">overthewire.org</div>
+  </a>
+  <a class="res-link" href="https://chmod-calculator.com" target="_blank" rel="noopener">
+    <div class="res-title">Calculateur de chmod en ligne</div>
+    <div class="res-desc">Convertit visuellement entre notation octale et symbolique pour vérifier ses calculs de permissions.</div>
+    <div class="res-url">chmod-calculator.com</div>
+  </a>
+
+  <h2>Documentation officielle</h2>
+  <a class="res-link" href="https://www.gnu.org/software/coreutils/manual/coreutils.html" target="_blank" rel="noopener">
+    <div class="res-title">GNU Coreutils Manual</div>
+    <div class="res-desc">Documentation officielle de ls, cp, mv, rm, chmod, chown, df, du, etc.</div>
+    <div class="res-url">gnu.org</div>
+  </a>
+  <a class="res-link" href="https://man7.org/linux/man-pages/man1/chmod.1.html" target="_blank" rel="noopener">
+    <div class="res-title">man chmod</div>
+    <div class="res-desc">Page de manuel officielle de la commande chmod, avec tous ses cas d'usage.</div>
+    <div class="res-url">man7.org</div>
+  </a>
+
+  <h2>Chaînes / vidéos de référence</h2>
+  <a class="res-link" href="https://www.youtube.com/results?search_query=permissions+linux+chmod+tutoriel+fran%C3%A7ais" target="_blank" rel="noopener">
+    <div class="res-title">Recherche YouTube — permissions Linux et chmod en français</div>
+    <div class="res-desc">Recherche préconfigurée pour trouver des tutoriels vidéo récents en français.</div>
+    <div class="res-url">youtube.com</div>
+  </a>
+
+  <h2>Aide-mémoire rapide</h2>
+  <div class="grid grid-2">
+    <div class="card"><h4><code>7 types de fichiers</code></h4><p>Ordinaire, répertoire, 5 spéciaux</p></div>
+    <div class="card"><h4><code>chemin absolu / relatif</code></h4><p>Depuis / ou depuis le répertoire de travail</p></div>
+    <div class="card"><h4><code>r=4, w=2, x=1</code></h4><p>Valeurs octales des permissions</p></div>
+    <div class="card"><h4><code>chmod / umask / chown / chgrp</code></h4><p>Les 4 commandes de gestion des permissions</p></div>
+    <div class="card"><h4><code>df / du / quota</code></h4><p>Surveiller l'espace disque</p></div>
+    <div class="card"><h4><code>u, g, o, a</code></h4><p>Propriétaire, groupe, autres, tous (chmod symbolique)</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>Mini-site généré pour révision BTS CIEL — Gérer les fichiers sous Linux</footer>
+
+<script>
+/* ---------- navigation ---------- */
+const tabs = document.querySelectorAll('nav.tabs button');
+const pages = document.querySelectorAll('section.page');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    pages.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.page).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------- terminal simulator with permissions ---------- */
+function mkFile(content, perm){ return {type:'file', content: content||'', perm: perm||'rw-r--r--', owner:'toto', group:'profs'}; }
+function mkDir(children, perm){ return {type:'dir', children: children||{}, perm: perm||'rwxr-xr-x', owner:'toto', group:'profs'}; }
+function makeFS(){
+  return mkDir({
+    home: mkDir({
+      toto: mkDir({
+        '.profile': mkFile(''),
+        'mbox': mkFile(''),
+        'main.cxx': mkFile('int main(){return 0;}'),
+        'rep1': mkDir({ 'fic1': mkFile('contenu de fic1') }),
+        'mail': mkDir({ 'toto': mkFile('') })
+      })
+    }),
+    etc: mkDir({}), var: mkDir({}), tmp: mkDir({}, 'rwxrwxrwt')
+  });
+}
+let fsRoot = makeFS();
+let cwd = ['home','toto'];
+let prevCwd = ['home','toto'];
+
+function getNode(pathArr){
+  let node = fsRoot;
+  for(const part of pathArr){
+    if(!node || node.type !== 'dir' || !node.children[part]) return null;
+    node = node.children[part];
+  }
+  return node;
+}
+function resolvePath(input){
+  if(!input) return cwd.slice();
+  let parts = input.split('/');
+  let base = input.startsWith('/') ? [] : cwd.slice();
+  for(const p of parts){
+    if(p === '' || p === '.') continue;
+    if(p === '..'){ base.pop(); }
+    else base.push(p);
+  }
+  return base;
+}
+function pathStr(arr){ return '/' + arr.join('/'); }
+function displayPrompt(){
+  const shown = (cwd.length===2 && cwd[0]==='home' && cwd[1]==='toto') ? '~' : '/'+cwd.join('/');
+  return `toto@bts-ciel:${shown}$`;
+}
+const outEl = document.getElementById('term-output');
+function printLine(text, cls){
+  const div = document.createElement('div');
+  if(cls) div.className = cls;
+  div.textContent = text;
+  outEl.appendChild(div);
+  outEl.scrollTop = outEl.scrollHeight;
+}
+function printPromptLine(cmd){
+  const div = document.createElement('div');
+  div.className = 'prompt-line';
+  div.textContent = displayPrompt() + ' ' + cmd;
+  outEl.appendChild(div);
+}
+
+/* permission helpers */
+const RWX = {r:4,w:2,x:1};
+function permToOctalDigit(str3){
+  let v=0;
+  if(str3[0]==='r') v+=4;
+  if(str3[1]==='w') v+=2;
+  if(str3[2]==='x'||str3[2]==='t') v+=1;
+  return v;
+}
+function permStringToOctal(perm){
+  return '' + permToOctalDigit(perm.slice(0,3)) + permToOctalDigit(perm.slice(3,6)) + permToOctalDigit(perm.slice(6,9));
+}
+function octalDigitToStr(d){
+  return (d&4?'r':'-') + (d&2?'w':'-') + (d&1?'x':'-');
+}
+function applyOctal(octal){
+  if(!/^[0-7]{3,4}$/.test(octal)) return null;
+  const digits = octal.length===4 ? octal.slice(1) : octal;
+  return digits.split('').map(d=>octalDigitToStr(parseInt(d))).join('');
+}
+function applySymbolic(current, spec){
+  let perm = current.split('');
+  const groups = {u:[0,1,2], g:[3,4,5], o:[6,7,8]};
+  const segments = spec.split(',');
+  for(const seg of segments){
+    const m = seg.match(/^([ugoa]*)([+\-=])([rwx]*)$/);
+    if(!m) return null;
+    let who = m[1] || 'a';
+    const op = m[2];
+    const what = m[3];
+    let whos = who === 'a' ? ['u','g','o'] : who.split('');
+    whos.forEach(w=>{
+      const idx = groups[w];
+      if(op === '='){
+        idx.forEach(i=>perm[i]='-');
+        if(what.includes('r')) perm[idx[0]]='r';
+        if(what.includes('w')) perm[idx[1]]='w';
+        if(what.includes('x')) perm[idx[2]]='x';
+      }else if(op === '+'){
+        if(what.includes('r')) perm[idx[0]]='r';
+        if(what.includes('w')) perm[idx[1]]='w';
+        if(what.includes('x')) perm[idx[2]]='x';
+      }else if(op === '-'){
+        if(what.includes('r')) perm[idx[0]]='-';
+        if(what.includes('w')) perm[idx[1]]='-';
+        if(what.includes('x')) perm[idx[2]]='-';
+      }
+    });
+  }
+  return perm.join('');
+}
+
+function fakeLsLong(name, node){
+  const typeChar = node.type === 'dir' ? 'd' : '-';
+  const links = node.type === 'dir' ? 2 : 1;
+  const size = node.type === 'dir' ? 4096 : (node.content ? node.content.length : 0);
+  return `${typeChar}${node.perm}  ${links} ${node.owner}  ${node.group}  ${String(size).padStart(5,' ')}  12 sept 10:32  ${name}`;
+}
+
+function runCommand(raw){
+  printPromptLine(raw);
+  const trimmed = raw.trim();
+  if(trimmed === ''){ return; }
+  const args = trimmed.split(/\s+/);
+  const cmd = args[0];
+  const rest = args.slice(1);
+  const flags = rest.filter(a => a.startsWith('-'));
+  const nonFlags = rest.filter(a => !a.startsWith('-'));
+  const flagStr = flags.join('');
+
+  switch(cmd){
+    case 'help':
+      printLine('Commandes : pwd, cd [chemin], ls [-a][-l] [chemin], mkdir [-p], rmdir, rm [-r], cp, mv, cat, chmod <mode> chemin, whoami, clear');
+      break;
+    case 'clear':
+      outEl.innerHTML = '';
+      break;
+    case 'whoami':
+      printLine('toto');
+      break;
+    case 'pwd':
+      printLine(pathStr(cwd));
+      break;
+    case 'cd': {
+      let target = nonFlags[0];
+      let newCwd;
+      if(!target){ newCwd = ['home','toto']; }
+      else if(target === '-'){ newCwd = prevCwd.slice(); }
+      else { newCwd = resolvePath(target); }
+      const node = getNode(newCwd);
+      if(!node || node.type !== 'dir'){
+        printLine(`cd: ${target || ''}: Aucun fichier ou dossier de ce type`, 'err');
+      }else{
+        prevCwd = cwd.slice();
+        cwd = newCwd;
+      }
+      break;
+    }
+    case 'ls': {
+      const target = nonFlags[0] ? resolvePath(nonFlags[0]) : cwd;
+      const node = getNode(target);
+      if(!node){ printLine(`ls: impossible d'accéder à '${nonFlags[0]}': Aucun fichier ou dossier de ce type`, 'err'); break; }
+      if(node.type !== 'dir'){ printLine(nonFlags[0] || ''); break; }
+      let names = Object.keys(node.children);
+      if(!flagStr.includes('a')) names = names.filter(n => !n.startsWith('.'));
+      names.sort();
+      if(names.length === 0){ break; }
+      if(flagStr.includes('l')){
+        printLine('total ' + names.length*4);
+        names.forEach(n => printLine(fakeLsLong(n, node.children[n])));
+      }else{
+        printLine(names.join('  '));
+      }
+      break;
+    }
+    case 'mkdir': {
+      if(nonFlags.length === 0){ printLine('mkdir: opérande manquant', 'err'); break; }
+      nonFlags.forEach(target => {
+        const parts = resolvePath(target);
+        const name = parts.pop();
+        let parentNode;
+        if(flagStr.includes('p')){
+          let cursor = fsRoot;
+          for(const part of parts){
+            if(!cursor.children[part]) cursor.children[part] = mkDir({});
+            cursor = cursor.children[part];
+          }
+          parentNode = cursor;
+        }else{
+          parentNode = getNode(parts);
+        }
+        if(!parentNode || parentNode.type !== 'dir'){
+          printLine(`mkdir: impossible de créer le répertoire '${target}': Aucun fichier ou dossier de ce type`, 'err');
+        }else if(parentNode.children[name]){
+          printLine(`mkdir: impossible de créer le répertoire '${target}': Le fichier existe déjà`, 'err');
+        }else{
+          parentNode.children[name] = mkDir({});
+          if(flagStr.includes('v')) printLine(`mkdir: répertoire '${target}' créé`);
+        }
+      });
+      break;
+    }
+    case 'rmdir': {
+      nonFlags.forEach(target => {
+        const parts = resolvePath(target);
+        const name = parts.pop();
+        const parentNode = getNode(parts);
+        if(!parentNode || !parentNode.children[name]){
+          printLine(`rmdir: impossible de supprimer '${target}': Aucun fichier ou dossier de ce type`, 'err');
+        }else if(parentNode.children[name].type !== 'dir'){
+          printLine(`rmdir: échec de suppression de '${target}': N'est pas un répertoire`, 'err');
+        }else if(Object.keys(parentNode.children[name].children).length > 0){
+          printLine(`rmdir: impossible de supprimer '${target}': Le répertoire n'est pas vide`, 'err');
+        }else{
+          delete parentNode.children[name];
+        }
+      });
+      break;
+    }
+    case 'rm': {
+      nonFlags.forEach(target => {
+        const parts = resolvePath(target);
+        const name = parts.pop();
+        const parentNode = getNode(parts);
+        if(!parentNode || !parentNode.children[name]){
+          printLine(`rm: impossible de supprimer '${target}': Aucun fichier ou dossier de ce type`, 'err');
+        }else if(parentNode.children[name].type === 'dir' && !flagStr.includes('r')){
+          printLine(`rm: impossible de supprimer '${target}': est un répertoire (utilisez -r)`, 'err');
+        }else{
+          delete parentNode.children[name];
+          if(flagStr.includes('v')) printLine(`rm: '${target}' supprimé`);
+        }
+      });
+      break;
+    }
+    case 'cat': {
+      const target = nonFlags[0];
+      if(!target){ printLine('cat: opérande manquant', 'err'); break; }
+      const parts = resolvePath(target);
+      const node = getNode(parts);
+      if(!node){ printLine(`cat: ${target}: Aucun fichier ou dossier de ce type`, 'err'); }
+      else if(node.type === 'dir'){ printLine(`cat: ${target}: est un dossier`, 'err'); }
+      else{ printLine(node.content || '(fichier vide)'); }
+      break;
+    }
+    case 'chmod': {
+      if(nonFlags.length < 2){ printLine('chmod: mode et référence requis', 'err'); break; }
+      const mode = nonFlags[0];
+      const targets = nonFlags.slice(1);
+      targets.forEach(target => {
+        const parts = resolvePath(target);
+        const node = getNode(parts);
+        if(!node){ printLine(`chmod: impossible d'accéder à '${target}': Aucun fichier ou dossier de ce type`, 'err'); return; }
+        let newPerm;
+        if(/^[0-7]{3,4}$/.test(mode)){
+          newPerm = applyOctal(mode);
+        }else{
+          newPerm = applySymbolic(node.perm, mode);
+        }
+        if(!newPerm){ printLine(`chmod: mode invalide : '${mode}'`, 'err'); return; }
+        node.perm = newPerm;
+      });
+      break;
+    }
+    case 'cp': {
+      if(nonFlags.length < 2){ printLine('cp: source et destination requises', 'err'); break; }
+      const dest = nonFlags[nonFlags.length-1];
+      const sources = nonFlags.slice(0, -1);
+      sources.forEach(src => {
+        const srcParts = resolvePath(src);
+        const srcName = srcParts[srcParts.length-1];
+        const srcNode = getNode(srcParts);
+        if(!srcNode){ printLine(`cp: impossible d'évaluer '${src}': Aucun fichier ou dossier de ce type`, 'err'); return; }
+        if(srcNode.type === 'dir' && !flagStr.includes('r')){ printLine(`cp: -r non spécifié; '${src}' est un répertoire`, 'err'); return; }
+        let destParts = resolvePath(dest);
+        const destNode = getNode(destParts);
+        let finalParentParts, finalName;
+        if(destNode && destNode.type === 'dir'){ finalParentParts = destParts; finalName = srcName; }
+        else{ finalParentParts = destParts.slice(0,-1); finalName = destParts[destParts.length-1]; }
+        const parentNode = getNode(finalParentParts);
+        if(!parentNode || parentNode.type !== 'dir'){ printLine(`cp: destination invalide`, 'err'); return; }
+        parentNode.children[finalName] = JSON.parse(JSON.stringify(srcNode));
+      });
+      break;
+    }
+    case 'mv': {
+      if(nonFlags.length < 2){ printLine('mv: source et destination requises', 'err'); break; }
+      const dest = nonFlags[nonFlags.length-1];
+      const sources = nonFlags.slice(0, -1);
+      sources.forEach(src => {
+        const srcParts = resolvePath(src);
+        const srcName = srcParts[srcParts.length-1];
+        const srcParentParts = srcParts.slice(0,-1);
+        const srcParent = getNode(srcParentParts);
+        if(!srcParent || !srcParent.children[srcName]){ printLine(`mv: impossible d'évaluer '${src}': Aucun fichier ou dossier de ce type`, 'err'); return; }
+        const srcNode = srcParent.children[srcName];
+        let destParts = resolvePath(dest);
+        const destNode = getNode(destParts);
+        let finalParentParts, finalName;
+        if(destNode && destNode.type === 'dir'){ finalParentParts = destParts; finalName = srcName; }
+        else{ finalParentParts = destParts.slice(0,-1); finalName = destParts[destParts.length-1]; }
+        const parentNode = getNode(finalParentParts);
+        if(!parentNode || parentNode.type !== 'dir'){ printLine(`mv: destination invalide`, 'err'); return; }
+        parentNode.children[finalName] = srcNode;
+        delete srcParent.children[srcName];
+      });
+      break;
+    }
+    default:
+      printLine(`${cmd} : commande introuvable. Tapez 'help' pour la liste des commandes disponibles.`, 'err');
+  }
+}
+
+const termInput = document.getElementById('term-input');
+const termPromptLive = document.getElementById('term-prompt-live');
+function refreshPromptLive(){ termPromptLive.textContent = displayPrompt(); }
+termInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    const val = termInput.value;
+    runCommand(val);
+    termInput.value = '';
+    refreshPromptLive();
+  }
+});
+printLine("Bienvenue ! Tapez 'help' pour voir les commandes disponibles. Vous êtes dans /home/toto.");
+refreshPromptLive();
+
+/* ---------- exercices ---------- */
+const exercices = [
+  {
+    level:"Niveau 1",
+    title:"Référence absolue (Q1/Q2 du support)",
+    statement:"Sur l'arborescence type du cours, quelle est la référence absolue du répertoire <code>toto</code> de <code>home</code> ? Puis celle du fichier <code>fic1</code> de <code>rep1</code> (dans toto) ?",
+    solution:"<pre class=\"code\">/home/toto\n/home/toto/rep1/fic1</pre>"
+  },
+  {
+    level:"Niveau 1",
+    title:"Référence relative (Q3/Q4 du support)",
+    statement:"En supposant que le répertoire de travail soit <code>/home/cpb</code>, quelle est la référence relative du répertoire <code>tp</code> (dans cpb) ? Et celle du fichier <code>fic1</code> de <code>rep2</code> (aussi dans cpb) ?",
+    solution:"<pre class=\"code\">tp\nrep2/fic1</pre>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Utiliser .. (Q5/Q6 du support)",
+    statement:"En supposant que le répertoire de travail soit <code>/home/toto</code>, quelle est la référence relative d'un répertoire <code>etxxxx</code> situé dans <code>home</code> (donc « frère » de toto) ? Et celle du fichier <code>toto</code> situé dans <code>mail</code> (dans toto) ?",
+    solution:"<pre class=\"code\">../etxxxx\nmail/toto</pre><p>Pour remonter d'un niveau (de toto vers home) puis redescendre dans etxxxx, on utilise <code>..</code>.</p>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Navigation avec cd (Q7 à Q12 du support)",
+    statement:"Le répertoire de travail et d'accueil est <code>/home/toto</code>. Donnez, dans l'ordre, les commandes pour : aller dans <code>projets/bidule</code> (relatif) ; aller dans <code>home</code> (absolu) ; aller dans <code>public</code> de <code>cpb</code> ; revenir à <code>home</code> ; aller dans <code>etc</code> (relatif) ; revenir à son répertoire d'accueil.",
+    solution:"<pre class=\"code\">cd projets/bidule\ncd /home\ncd cpb/public\ncd ..\ncd etc\ncd</pre><p>Le dernier <code>cd</code> sans argument ramène toujours au répertoire d'accueil, quel que soit l'endroit courant.</p>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Calcul chmod (mode absolu)",
+    statement:"Un fichier doit avoir les droits suivants : lecture/écriture/exécution pour le propriétaire, lecture/exécution pour le groupe, aucun droit pour les autres. Donnez la commande <code>chmod</code> correspondante en mode absolu.",
+    solution:"<pre class=\"code\">chmod 750 fichier</pre><p>Propriétaire : rwx = 4+2+1 = 7. Groupe : r-x = 4+1 = 5. Autres : --- = 0.</p>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"chmod en mode symbolique",
+    statement:"Un script a pour permissions <code>rw-rw-r--</code>. Écrivez une seule commande <code>chmod</code> en mode symbolique qui : ajoute l'exécution au propriétaire et au groupe, et retire tous les droits aux autres.",
+    solution:"<pre class=\"code\">chmod ug+x,o= script.sh</pre><p>Résultat final : <code>rwxrwx---</code>.</p>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"Effet du umask",
+    statement:"Le masque de création est <code>umask 022</code>. Un utilitaire crée un fichier ordinaire avec le mode par défaut <code>0666</code>. Quelles seront les permissions finales du fichier créé ?",
+    solution:"<p>Le masque <code>022</code> retire l'écriture (2) au groupe et aux autres. <code>666</code> (rw-rw-rw-) moins le masque <code>022</code> donne <code>644</code> soit <code>rw-r--r--</code> : le propriétaire garde lecture/écriture, groupe et autres n'ont plus que la lecture.</p>"
+  },
+  {
+    level:"Bonus — hors programme",
+    title:"SUID sur un exécutable",
+    statement:"Que fait la commande <code>chmod 4755 /usr/bin/programme</code>, et pourquoi ce mécanisme est-il utilisé par la commande <code>passwd</code> ?",
+    solution:"<p>Le <code>4</code> initial active le bit SUID : le programme s'exécute avec les droits de son propriétaire (souvent root) plutôt que ceux de l'utilisateur qui le lance. <code>passwd</code> en a besoin car modifier le fichier des mots de passe nécessite les droits root, même quand un utilisateur normal change son propre mot de passe.</p>"
+  }
+];
+const exoList = document.getElementById('exo-list');
+exercices.forEach((ex)=>{
+  const acc = document.createElement('div');
+  acc.className = 'accordion';
+  acc.innerHTML = `
+    <div class="acc-head">
+      <span><span class="lvl">${ex.level}</span>${ex.title}</span>
+      <span class="acc-arrow">▶</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>${ex.statement}</p>
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;color:var(--amber);font-family:var(--mono);font-size:.85rem;">Voir la solution</summary>
+          <div style="margin-top:10px;">${ex.solution}</div>
+        </details>
+      </div>
+    </div>`;
+  acc.querySelector('.acc-head').addEventListener('click', ()=>acc.classList.toggle('open'));
+  exoList.appendChild(acc);
+});
+
+/* ---------- flashcards ---------- */
+const flashcards = [
+  {q:"Combien de types de fichiers existent sous Unix, et en combien de catégories ?", a:"7 types, regroupés en 3 catégories : fichiers ordinaires, répertoires, et fichiers spéciaux (5 types)."},
+  {q:"Le système Unix est-il sensible à la casse dans les noms de fichiers ?", a:"Oui : toto et Toto sont deux fichiers différents (sauf exceptions comme certains systèmes de fichiers FAT sur clés USB)."},
+  {q:"Que désigne le répertoire spécial '..' ?", a:"Le répertoire parent du répertoire parent (le « grand-parent »)."},
+  {q:"Quelle est la différence entre Ko et Kio ?", a:"Ko (kilo-octet) = 1000 octets (norme internationale). Kio (kibioctet) = 1024 octets (puissance de 2, usage informatique historique)."},
+  {q:"Quel droit faut-il pour 'traverser' un répertoire (y entrer avec cd) ?", a:"Le droit d'exécution (x), indépendamment du droit de lecture."},
+  {q:"Quelles permissions sont nécessaires pour déplacer un fichier avec mv ?", a:"Le droit d'écriture et d'exécution sur les répertoires source ET destination — aucun droit sur le fichier lui-même."},
+  {q:"Que fait la commande umask, à l'inverse de chmod ?", a:"Elle indique les permissions à NE PAS accorder lors de la création d'un nouveau fichier, alors que chmod modifie les permissions d'un fichier existant."},
+  {q:"Qui peut changer le propriétaire d'un fichier avec chown ?", a:"Seul root peut changer le propriétaire d'un fichier."},
+  {q:"Que fait la commande df ? Et du ?", a:"df affiche l'occupation des systèmes de fichiers (partitions). du calcule la taille occupée par des fichiers ou répertoires spécifiques."},
+  {q:"En mode symbolique chmod, que signifie l'opérateur '=' ?", a:"Il fixe exactement les droits indiqués pour la catégorie choisie, en retirant tous les autres droits de cette catégorie."},
+  {q:"Quelle valeur octale correspond aux droits rwx ?", a:"7 (4 pour r + 2 pour w + 1 pour x)."},
+  {q:"Que se passe-t-il si on supprime un fichier ayant plusieurs liens physiques ?", a:"Les données ne sont réellement effacées que lorsque le dernier lien physique (nom) pointant vers l'inode est supprimé."}
+];
+let flashIndex = 0, flipped = false;
+const flashCardEl = document.getElementById('flash-card');
+const flashFront = document.getElementById('flash-front-text');
+const flashBack = document.getElementById('flash-back-text');
+const flashCount = document.getElementById('flash-count');
+function renderFlash(){
+  flashFront.textContent = flashcards[flashIndex].q;
+  flashBack.textContent = flashcards[flashIndex].a;
+  flashCount.textContent = `${flashIndex+1} / ${flashcards.length}`;
+  flashCardEl.classList.remove('flipped');
+  flipped = false;
+}
+flashCardEl.addEventListener('click', ()=>{
+  flipped = !flipped;
+  flashCardEl.classList.toggle('flipped', flipped);
+});
+document.getElementById('flash-next').addEventListener('click', ()=>{
+  flashIndex = (flashIndex+1) % flashcards.length;
+  renderFlash();
+});
+document.getElementById('flash-prev').addEventListener('click', ()=>{
+  flashIndex = (flashIndex-1+flashcards.length) % flashcards.length;
+  renderFlash();
+});
+renderFlash();
+
+/* ---------- QCM ---------- */
+const qcm = [
+  {q:"Combien de types de fichiers existe-t-il sous Unix ?", options:["3","5","7","10"], correct:2},
+  {q:"Quel caractère ne peut JAMAIS apparaître dans un nom de fichier Unix ?", options:["Le point .","Le slash /","L'espace","Le tiret -"], correct:1},
+  {q:"Que désigne le répertoire '.' ?", options:["Le répertoire parent","Le répertoire courant lui-même","La racine","Le répertoire grand-parent"], correct:1},
+  {q:"Quelle commande affiche l'occupation des systèmes de fichiers montés ?", options:["du","df","quota","fdisk"], correct:1},
+  {q:"En mode absolu chmod, que vaut le chiffre pour rw- ?", options:["4","5","6","7"], correct:2},
+  {q:"Quel droit est nécessaire pour lister le contenu d'un répertoire avec ls ?", options:["Écriture","Exécution","Lecture","Aucun droit requis"], correct:2},
+  {q:"Qui peut changer le propriétaire d'un fichier avec chown ?", options:["Le propriétaire actuel","N'importe quel utilisateur du même groupe","Seul root","Personne, c'est fixé à la création"], correct:2},
+  {q:"Que fait umask 022 par rapport aux permissions par défaut d'un fichier ?", options:["Ajoute l'écriture pour tous","Retire l'écriture au groupe et aux autres","Retire la lecture à tous","N'a aucun effet"], correct:1},
+  {q:"Quelle commande crée un lien symbolique ?", options:["ln -s","cp -s","mv -s","ls -s"], correct:0},
+  {q:"Sur un répertoire partagé, quel bit empêche un utilisateur de supprimer les fichiers des autres ?", options:["SUID","SGID","Sticky bit","ACL"], correct:2}
+];
+const qcmList = document.getElementById('qcm-list');
+qcm.forEach((item,qi)=>{
+  const div = document.createElement('div');
+  div.className = 'qcm-q';
+  div.innerHTML = `<p class="question">${qi+1}. ${item.q}</p>` +
+    item.options.map((opt,oi)=>`
+      <label class="qcm-opt">
+        <input type="radio" name="q${qi}" value="${oi}">
+        <span>${opt}</span>
+      </label>`).join('') +
+    `<div class="qcm-feedback" id="fb-${qi}"></div>`;
+  qcmList.appendChild(div);
+});
+document.getElementById('qcm-submit').addEventListener('click', ()=>{
+  let score = 0;
+  qcm.forEach((item,qi)=>{
+    const checked = document.querySelector(`input[name="q${qi}"]:checked`);
+    const fb = document.getElementById(`fb-${qi}`);
+    if(!checked){
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = 'Aucune réponse sélectionnée.';
+      return;
+    }
+    if(parseInt(checked.value) === item.correct){
+      score++;
+      fb.className = 'qcm-feedback ok';
+      fb.textContent = '✓ Bonne réponse';
+    }else{
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = '✗ Réponse attendue : ' + item.options[item.correct];
+    }
+  });
+  const scoreEl = document.getElementById('qcm-score');
+  scoreEl.style.display = 'block';
+  scoreEl.innerHTML = `Score : ${score} / ${qcm.length} ${score===qcm.length ? '🎉' : ''}`;
+  scoreEl.scrollIntoView({behavior:'smooth', block:'center'});
+});
+</script>
+</body>
+</html>

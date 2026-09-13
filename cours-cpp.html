@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ — Cours interactif BTS CIEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d12;
+  --panel:#11161d;
+  --panel-2:#161c25;
+  --border:#232b37;
+  --text:#d5dbe3;
+  --text-dim:#7c8798;
+  --amber:#e3b341;
+  --green:#7ee787;
+  --red:#ff7b72;
+  --blue:#58a6ff;
+  --purple:#c9a6ff;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;}
+::selection{background:var(--amber);color:#0a0d12;}
+
+header.topbar{position:sticky;top:0;z-index:50;background:rgba(10,13,18,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.brand{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:8px;}
+.brand .dot{color:var(--amber);}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
+nav.tabs button{font-family:var(--mono);font-size:.82rem;background:none;border:1px solid transparent;color:var(--text-dim);padding:7px 12px;border-radius:6px;cursor:pointer;transition:.15s;}
+nav.tabs button:hover{color:var(--text);border-color:var(--border);}
+nav.tabs button.active{color:var(--bg);background:var(--amber);font-weight:600;}
+
+main{max-width:1100px;margin:0 auto;padding:32px 20px 80px;}
+section.page{display:none;animation:fade .25s ease;}
+section.page.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+h1{font-size:1.9rem;margin:0 0 6px;color:#fff;letter-spacing:-.01em;}
+h2{font-size:1.35rem;margin:40px 0 14px;color:#fff;border-bottom:1px solid var(--border);padding-bottom:10px;}
+h2:first-of-type{margin-top:0;}
+h3{font-size:1.05rem;color:var(--amber);margin:24px 0 8px;}
+p{color:var(--text);}
+.subtitle{color:var(--text-dim);font-size:1rem;margin-bottom:28px;}
+code, .mono{font-family:var(--mono);}
+code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.88em;color:var(--green);}
+
+pre.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.65;color:#c9d1d9;margin:10px 0 18px;}
+pre.code .c1{color:var(--text-dim);}
+pre.code .tok{color:var(--amber);}
+pre.code .str{color:var(--green);}
+pre.code .kw{color:#ff7b72;}
+
+.box{border-left:3px solid;border-radius:6px;padding:12px 16px;margin:16px 0;background:var(--panel);}
+.box-retenir{border-color:var(--green);}
+.box-attention{border-color:var(--red);}
+.box-title{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.03em;margin-bottom:4px;}
+.box-retenir .box-title{color:var(--green);}
+.box-attention .box-title{color:var(--red);}
+
+.toc-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:0 0 30px;}
+.toc-title{font-family:var(--mono);font-size:.75rem;color:var(--text-dim);letter-spacing:.03em;margin-bottom:10px;}
+.toc-box a{display:inline-block;color:var(--blue);text-decoration:none;font-size:.85rem;margin:0 14px 8px 0;font-family:var(--mono);}
+.toc-box a:hover{text-decoration:underline;}
+.badge-plus{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--purple);border:1px solid #6e4fa3;background:rgba(160,120,255,.1);padding:1px 8px;border-radius:20px;vertical-align:middle;letter-spacing:.02em;}
+.plus-divider{display:flex;align-items:center;gap:12px;margin:44px 0 10px;color:var(--text-dim);font-family:var(--mono);font-size:.78rem;}
+.plus-divider::before,.plus-divider::after{content:"";flex:1;height:1px;background:var(--border);}
+
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.card h4{margin:0 0 6px;font-size:.95rem;color:#fff;}
+.card p{margin:0;color:var(--text-dim);font-size:.88rem;}
+
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.88rem;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+th{color:var(--text-dim);font-weight:600;font-family:var(--mono);font-size:.78rem;}
+td code{white-space:nowrap;}
+
+.mindmap{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+.mm-row{display:flex;gap:10px;flex-wrap:wrap;}
+.mm-node{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;}
+.mm-node.root{background:var(--amber);color:#0a0d12;font-weight:700;border:none;}
+
+.accordion{border:1px solid var(--border);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--panel);}
+.acc-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;cursor:pointer;font-size:.92rem;color:var(--text);}
+.acc-head:hover{background:var(--panel-2);}
+.acc-head .lvl{font-family:var(--mono);font-size:.72rem;color:var(--amber);border:1px solid var(--amber);padding:1px 7px;border-radius:20px;margin-right:10px;}
+.acc-arrow{transition:.2s;color:var(--text-dim);}
+.accordion.open .acc-arrow{transform:rotate(90deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:1px solid transparent;}
+.accordion.open .acc-body{max-height:800px;border-top:1px solid var(--border);}
+.acc-body-inner{padding:14px 16px;}
+
+.flash-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flash-card{width:100%;max-width:480px;height:220px;perspective:1200px;cursor:pointer;}
+.flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+.flash-card.flipped .flash-inner{transform:rotateY(180deg);}
+.flash-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;border:1px solid var(--border);}
+.flash-front{background:var(--panel);}
+.flash-back{background:var(--panel-2);transform:rotateY(180deg);color:var(--green);}
+.flash-face p{font-size:1.05rem;font-family:var(--mono);margin:0;}
+.flash-controls{display:flex;gap:12px;align-items:center;}
+.flash-count{color:var(--text-dim);font-family:var(--mono);font-size:.85rem;}
+
+button.btn{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:7px;cursor:pointer;font-size:.85rem;transition:.15s;}
+button.btn:hover{border-color:var(--amber);color:var(--amber);}
+button.btn.primary{background:var(--amber);color:#0a0d12;border:none;font-weight:700;}
+button.btn.primary:hover{opacity:.9;color:#0a0d12;}
+
+.qcm-q{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+.qcm-q p.question{margin:0 0 10px;font-weight:600;color:#fff;}
+.qcm-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:4px;}
+.qcm-opt:hover{background:var(--panel-2);}
+.qcm-opt input{accent-color:var(--amber);}
+.qcm-feedback{display:none;font-size:.85rem;margin-top:8px;padding:8px 10px;border-radius:6px;font-family:var(--mono);}
+.qcm-feedback.ok{background:rgba(126,231,135,.1);color:var(--green);display:block;}
+.qcm-feedback.ko{background:rgba(255,123,114,.1);color:var(--red);display:block;}
+#qcm-score{text-align:center;font-family:var(--mono);font-size:1.3rem;padding:20px;border:1px solid var(--border);border-radius:10px;background:var(--panel);display:none;margin-top:20px;}
+
+/* memory visualizer */
+.memviz{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;margin:20px 0;}
+.memviz-code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:.85rem;margin-bottom:16px;}
+.memviz-code .line{padding:3px 6px;border-radius:4px;color:var(--text-dim);}
+.memviz-code .line.current{background:rgba(227,179,65,.15);color:var(--amber);font-weight:600;}
+.memviz-stack{display:flex;gap:14px;flex-wrap:wrap;min-height:90px;align-items:flex-start;margin-bottom:16px;}
+.memcell{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:.82rem;min-width:110px;text-align:center;position:relative;transition:.2s;}
+.memcell.updated{border-color:var(--amber);box-shadow:0 0 0 2px rgba(227,179,65,.2);}
+.memcell .mc-name{color:var(--blue);font-weight:700;}
+.memcell .mc-addr{color:var(--text-dim);font-size:.72rem;margin-top:2px;}
+.memcell .mc-val{color:var(--green);font-size:1rem;margin-top:6px;font-weight:700;}
+.memcell .mc-arrow{color:var(--purple);font-size:.72rem;margin-top:4px;}
+.memviz-desc{color:var(--text-dim);font-size:.88rem;margin-bottom:14px;min-height:40px;}
+.memviz-controls{display:flex;gap:10px;justify-content:center;}
+
+.res-link{display:block;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:var(--text);transition:.15s;}
+.res-link:hover{border-color:var(--amber);}
+.res-link .res-title{color:#fff;font-weight:600;font-size:.95rem;}
+.res-link .res-desc{color:var(--text-dim);font-size:.83rem;margin-top:3px;}
+.res-link .res-url{font-family:var(--mono);color:var(--blue);font-size:.78rem;margin-top:4px;}
+
+footer{text-align:center;color:var(--text-dim);font-size:.8rem;padding:30px 20px;font-family:var(--mono);}
+
+@media(max-width:640px){
+  .topbar-inner{flex-direction:column;align-items:flex-start;}
+  nav.tabs{width:100%;overflow-x:auto;}
+  h1{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">#include <span class="dot">&lt;cours&gt;</span></div>
+    <nav class="tabs">
+      <button data-page="accueil" class="active">Accueil</button>
+      <button data-page="cours">Le Cours</button>
+      <button data-page="exercices">Exercices</button>
+      <button data-page="revisions">Révisions</button>
+      <button data-page="ressources">Ressources</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= ACCUEIL ================= -->
+<section class="page active" id="accueil">
+  <h1>Le langage C++</h1>
+  <p class="subtitle">Des types de base à la programmation orientée objet — niveau BTS CIEL, avec des approfondissements signalés au-delà du programme.</p>
+
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Le <strong>C++</strong> est un langage compilé, orienté objet, hérité du C. Il est très utilisé dans le monde de l'embarqué, des systèmes et des réseaux — au cœur du référentiel BTS CIEL — car il donne un contrôle fin de la mémoire tout en offrant les outils de la programmation orientée objet.
+  </div>
+
+  <h2>Objectifs du cours</h2>
+  <div class="grid grid-3">
+    <div class="card"><h4>Maîtriser la syntaxe de base</h4><p>Types, variables, opérateurs, structures de contrôle.</p></div>
+    <div class="card"><h4>Écrire des fonctions robustes</h4><p>Passage par valeur, par référence, surcharge.</p></div>
+    <div class="card"><h4>Comprendre la mémoire</h4><p>Pointeurs, références, allocation dynamique.</p></div>
+    <div class="card"><h4>Structurer les données</h4><p>Tableaux, chaînes, structures (struct).</p></div>
+    <div class="card"><h4>Découvrir la POO</h4><p>Classes, encapsulation, constructeurs, héritage.</p></div>
+    <div class="card"><h4>S'entraîner en conditions d'examen</h4><p>Exercices progressifs type BTS avec correction.</p></div>
+  </div>
+
+  <h2>Prérequis</h2>
+  <ul>
+    <li>Bases de la programmation (variables, boucles, fonctions) — idéalement déjà vues en Python</li>
+    <li>Notion de compilation vs interprétation appréciable mais non indispensable</li>
+    <li>Aucune expérience préalable du C ou du C++ n'est nécessaire</li>
+  </ul>
+
+  <div class="box box-attention">
+    <div class="box-title">POUR LES PYTHONISTES</div>
+    Amir, tu es déjà à l'aise en Python : le C++ va te sembler plus verbeux (typage explicite, points-virgules, compilation) mais beaucoup de logique reste identique (conditions, boucles, fonctions). La vraie nouveauté sera la <strong>gestion manuelle de la mémoire</strong> (pointeurs) qui n'existe pas en Python.
+  </div>
+
+  <h2>Carte mentale du cours</h2>
+  <div class="mindmap">
+    <div class="mm-row"><div class="mm-node root">C++</div></div>
+    <div class="mm-row">
+      <div class="mm-node">Bases du langage<br><span style="color:var(--text-dim);font-size:.78rem">types, variables, opérateurs</span></div>
+      <div class="mm-node">Structures de contrôle<br><span style="color:var(--text-dim);font-size:.78rem">if, switch, for, while</span></div>
+      <div class="mm-node">Fonctions<br><span style="color:var(--text-dim);font-size:.78rem">valeur, référence, surcharge</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Tableaux & chaînes<br><span style="color:var(--text-dim);font-size:.78rem">array, std::string</span></div>
+      <div class="mm-node">Pointeurs & mémoire<br><span style="color:var(--text-dim);font-size:.78rem">*, &amp;, new/delete</span></div>
+      <div class="mm-node">Structures & énumérations<br><span style="color:var(--text-dim);font-size:.78rem">struct, enum</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Programmation orientée objet<br><span style="color:var(--text-dim);font-size:.78rem">classes, encapsulation</span></div>
+      <div class="mm-node">Héritage & polymorphisme<br><span style="color:var(--text-dim);font-size:.78rem">virtual, override</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COURS ================= -->
+<section class="page" id="cours">
+  <h1>Le cours structuré</h1>
+  <p class="subtitle">Programme BTS CIEL couvert intégralement (sections 1 à 9), puis des approfondissements signalés <span class="badge-plus">+ hors programme</span> pour aller plus loin (sections 10 à 13).</p>
+
+  <div class="toc-box">
+    <div class="toc-title">Sommaire</div>
+    <a href="#c1">1. Introduction & compilation</a>
+    <a href="#c2">2. Types, variables, opérateurs</a>
+    <a href="#c3">3. Structures de contrôle</a>
+    <a href="#c4">4. Fonctions</a>
+    <a href="#c5">5. Tableaux et chaînes</a>
+    <a href="#c6">6. Pointeurs et références</a>
+    <a href="#c7">7. Structures et énumérations</a>
+    <a href="#c8">8. Programmation orientée objet</a>
+    <a href="#c9">9. Héritage et polymorphisme</a>
+    <a href="#c10">10. STL : vector & templates <span class="badge-plus">+</span></a>
+    <a href="#c11">11. Gestion des exceptions <span class="badge-plus">+</span></a>
+    <a href="#c12">12. RAII & pointeurs intelligents <span class="badge-plus">+</span></a>
+    <a href="#c13">13. Compilation multi-fichiers <span class="badge-plus">+</span></a>
+  </div>
+
+  <h2 id="c1">1. Introduction : compilation et premier programme</h2>
+  <p>Contrairement à Python, le C++ est un langage <strong>compilé</strong> : le code source (<code>.cpp</code>) est transformé par un compilateur (g++, clang++, MSVC) en un exécutable binaire avant de pouvoir être lancé. Cette étape supplémentaire permet des vérifications de type strictes et des programmes très performants, au prix d'un cycle développement/test un peu plus long.</p>
+  <pre class="code"><span class="c1">// hello.cpp</span>
+#include &lt;iostream&gt;
+
+int main() {
+    std::cout &lt;&lt; "Bonjour BTS CIEL !" &lt;&lt; std::endl;
+    return 0;
+}</pre>
+  <p>Compilation puis exécution en ligne de commande :</p>
+  <pre class="code">g++ hello.cpp -o hello
+./hello</pre>
+  <table>
+    <tr><th>Élément</th><th>Rôle</th></tr>
+    <tr><td><code>#include &lt;iostream&gt;</code></td><td>Importe la bibliothèque d'entrées/sorties (équivalent d'un <code>import</code> Python)</td></tr>
+    <tr><td><code>int main()</code></td><td>Point d'entrée obligatoire du programme</td></tr>
+    <tr><td><code>std::cout &lt;&lt;</code></td><td>Affiche sur la sortie standard (comme <code>print()</code>)</td></tr>
+    <tr><td><code>return 0;</code></td><td>Indique au système d'exploitation que le programme s'est terminé sans erreur</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Chaque instruction se termine par un <strong>point-virgule</strong> <code>;</code>. Les blocs de code sont délimités par des accolades <code>{ }</code>, et non par l'indentation comme en Python (même si une bonne indentation reste indispensable pour la lisibilité).
+  </div>
+
+  <h2 id="c2">2. Types de données, variables et opérateurs</h2>
+  <p>Le C++ est <strong>typé statiquement</strong> : le type d'une variable est fixé à sa déclaration et ne change jamais, contrairement à Python.</p>
+  <table>
+    <tr><th>Type</th><th>Contenu</th><th>Exemple</th></tr>
+    <tr><td><code>int</code></td><td>Entier</td><td><code>int age = 17;</code></td></tr>
+    <tr><td><code>float</code> / <code>double</code></td><td>Nombre à virgule (double = plus grande précision)</td><td><code>double pi = 3.14159;</code></td></tr>
+    <tr><td><code>char</code></td><td>Un seul caractère</td><td><code>char lettre = 'A';</code></td></tr>
+    <tr><td><code>bool</code></td><td>Vrai/Faux (<code>true</code>/<code>false</code>)</td><td><code>bool actif = true;</code></td></tr>
+    <tr><td><code>std::string</code></td><td>Chaîne de caractères (bibliothèque standard)</td><td><code>std::string nom = "Amir";</code></td></tr>
+  </table>
+  <p>Opérateurs courants : arithmétiques <code>+ - * / %</code>, comparaison <code>== != &lt; &gt; &lt;= &gt;=</code>, logiques <code>&amp;&amp; || !</code>, affectation composée <code>+= -= *= /=</code>, incrémentation <code>++</code> / décrémentation <code>--</code>.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — division entière</div>
+    <code>7 / 2</code> entre deux <code>int</code> vaut <code>3</code> (division entière, la partie décimale est tronquée), pas <code>3.5</code>. Pour obtenir un résultat décimal, il faut qu'au moins un des deux opérandes soit un <code>float</code>/<code>double</code> : <code>7.0 / 2</code> vaut bien <code>3.5</code>.
+  </div>
+  <p>Le mot-clé <code>const</code> déclare une variable dont la valeur ne pourra plus changer après initialisation : <code>const double TVA = 0.20;</code>.</p>
+
+  <h2 id="c3">3. Structures de contrôle</h2>
+  <pre class="code"><span class="c1">// Condition</span>
+if (note &gt;= 10) {
+    std::cout &lt;&lt; "Admis";
+} else if (note &gt;= 8) {
+    std::cout &lt;&lt; "Rattrapage";
+} else {
+    std::cout &lt;&lt; "Recalé";
+}
+
+<span class="c1">// Boucle for : compteur classique</span>
+for (int i = 0; i &lt; 10; i++) {
+    std::cout &lt;&lt; i &lt;&lt; " ";
+}
+
+<span class="c1">// Boucle while : condition vérifiée avant chaque tour</span>
+int n = 5;
+while (n &gt; 0) {
+    std::cout &lt;&lt; n &lt;&lt; " ";
+    n--;
+}
+
+<span class="c1">// Boucle do-while : le corps s'exécute au moins une fois</span>
+int saisie;
+do {
+    std::cout &lt;&lt; "Entrez un nombre positif : ";
+    std::cin &gt;&gt; saisie;
+} while (saisie &lt; 0);
+
+<span class="c1">// switch : équivalent d'une longue chaîne de if/else if</span>
+switch (jour) {
+    case 1: std::cout &lt;&lt; "Lundi"; break;
+    case 2: std::cout &lt;&lt; "Mardi"; break;
+    default: std::cout &lt;&lt; "Autre jour";
+}</pre>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — le break dans un switch</div>
+    Oublier <code>break;</code> à la fin d'un <code>case</code> provoque un <strong>fall-through</strong> : l'exécution continue dans le <code>case</code> suivant, même si sa condition n'est pas remplie. C'est une source d'erreur très classique.
+  </div>
+
+  <h2 id="c4">4. Fonctions</h2>
+  <pre class="code"><span class="c1">// Déclaration : type de retour, nom, paramètres typés</span>
+int addition(int a, int b) {
+    return a + b;
+}
+
+<span class="c1">// Passage par valeur : la fonction reçoit une COPIE</span>
+void incrementerValeur(int x) {
+    x = x + 1;  <span class="c1">// n'affecte pas la variable d'origine</span>
+}
+
+<span class="c1">// Passage par référence : la fonction modifie la variable d'origine</span>
+void incrementerReference(int &x) {
+    x = x + 1;  <span class="c1">// modifie réellement la variable appelante</span>
+}
+
+<span class="c1">// Surcharge de fonction : même nom, signatures différentes</span>
+int carre(int x) { return x * x; }
+double carre(double x) { return x * x; }</pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Par défaut, les paramètres sont passés <strong>par valeur</strong> (copie). Pour qu'une fonction modifie réellement une variable de l'appelant, il faut un paramètre par <strong>référence</strong> (<code>&amp;</code>) ou par <strong>pointeur</strong> (<code>*</code>, voir section 6).
+  </div>
+
+  <h2 id="c5">5. Tableaux et chaînes de caractères</h2>
+  <pre class="code"><span class="c1">// Tableau statique de taille fixe</span>
+int notes[5] = {12, 15, 8, 17, 10};
+std::cout &lt;&lt; notes[0];  <span class="c1">// -&gt; 12 (indexation à partir de 0)</span>
+
+<span class="c1">// Parcours d'un tableau</span>
+for (int i = 0; i &lt; 5; i++) {
+    std::cout &lt;&lt; notes[i] &lt;&lt; " ";
+}
+
+<span class="c1">// Tableau à deux dimensions</span>
+int grille[2][3] = { {1,2,3}, {4,5,6} };
+
+<span class="c1">// Chaîne de caractères moderne (recommandée)</span>
+std::string nom = "Amir";
+nom += " Eddahmani";           <span class="c1">// concaténation</span>
+std::cout &lt;&lt; nom.length();    <span class="c1">// longueur de la chaîne</span></pre>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — dépassement de tableau</div>
+    Contrairement à Python, le C++ ne vérifie <strong>pas</strong> automatiquement les indices d'un tableau statique. Accéder à <code>notes[10]</code> sur un tableau de taille 5 ne provoque pas forcément d'erreur immédiate visible, mais lit une zone mémoire invalide — un comportement indéfini (<em>undefined behavior</em>), source de bugs difficiles à diagnostiquer.
+  </div>
+
+  <h2 id="c6">6. Pointeurs et références</h2>
+  <p>Un <strong>pointeur</strong> est une variable qui stocke une <strong>adresse mémoire</strong> plutôt qu'une valeur directe. C'est la notion la plus caractéristique du C/C++, et celle qui n'a pas d'équivalent direct en Python.</p>
+  <table>
+    <tr><th>Opérateur</th><th>Nom</th><th>Effet</th></tr>
+    <tr><td><code>&amp;</code></td><td>Adresse de</td><td>Récupère l'adresse mémoire d'une variable</td></tr>
+    <tr><td><code>*</code></td><td>Déréférencement</td><td>Accède à la valeur pointée par une adresse</td></tr>
+    <tr><td><code>new</code></td><td>Allocation dynamique</td><td>Réserve de la mémoire sur le "tas" (heap)</td></tr>
+    <tr><td><code>delete</code></td><td>Libération</td><td>Libère une mémoire allouée avec <code>new</code></td></tr>
+  </table>
+  <pre class="code">int a = 10;
+int *p = &a;         <span class="c1">// p contient l'adresse de a</span>
+std::cout &lt;&lt; *p;    <span class="c1">// -&gt; 10 (déréférencement : valeur pointée)</span>
+*p = 20;             <span class="c1">// modifie a via le pointeur : a vaut maintenant 20</span>
+
+<span class="c1">// Allocation dynamique</span>
+int *q = new int(42);  <span class="c1">// réserve un int sur le tas, initialisé à 42</span>
+delete q;               <span class="c1">// libère la mémoire — obligatoire !</span></pre>
+
+  <h3>🧠 Visualiseur mémoire — comprendre les pointeurs pas à pas</h3>
+  <div class="memviz">
+    <div class="memviz-code" id="memviz-code"></div>
+    <div class="memviz-stack" id="memviz-stack"></div>
+    <div class="memviz-desc" id="memviz-desc"></div>
+    <div class="memviz-controls">
+      <button class="btn" id="memviz-prev">← Précédent</button>
+      <button class="btn primary" id="memviz-next">Étape suivante →</button>
+      <button class="btn" id="memviz-reset">↺ Recommencer</button>
+    </div>
+  </div>
+
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — pointeur non initialisé</div>
+    Un pointeur déclaré sans être initialisé (<code>int *p;</code>) contient une adresse <strong>aléatoire</strong>. Le déréférencer avant de lui affecter une adresse valide (<code>*p = 5;</code>) est un comportement indéfini pouvant planter le programme. Initialisez toujours un pointeur, au besoin avec <code>nullptr</code>.
+  </div>
+  <p>Une <strong>référence</strong> (<code>&amp;</code> dans une déclaration de variable, section 4) est un "alias" d'une variable existante : contrairement à un pointeur, elle ne peut pas être <code>nullptr</code> et ne peut pas être réaffectée à une autre variable après sa création.</p>
+
+  <h2 id="c7">7. Structures et énumérations</h2>
+  <pre class="code"><span class="c1">// Une structure regroupe plusieurs champs sous un même type</span>
+struct Etudiant {
+    std::string nom;
+    int age;
+    double moyenne;
+};
+
+Etudiant e1;
+e1.nom = "Amir";
+e1.age = 17;
+e1.moyenne = 15.5;
+
+<span class="c1">// Tableau de structures</span>
+Etudiant classe[30];
+classe[0].nom = "Amir";
+
+<span class="c1">// Énumération : ensemble de constantes nommées</span>
+enum Jour { LUNDI, MARDI, MERCREDI, JEUDI, VENDREDI, SAMEDI, DIMANCHE };
+Jour aujourdhui = MERCREDI;</pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Une <code>struct</code> est très proche d'une classe (section 8) : la seule différence par défaut en C++ est que les champs d'une <code>struct</code> sont <strong>publics</strong> par défaut, alors que ceux d'une <code>class</code> sont <strong>privés</strong> par défaut.
+  </div>
+
+  <h2 id="c8">8. Programmation orientée objet : les classes</h2>
+  <pre class="code">class Rectangle {
+private:
+    double largeur;
+    double hauteur;
+
+public:
+    <span class="c1">// Constructeur : initialise l'objet à sa création</span>
+    Rectangle(double l, double h) {
+        largeur = l;
+        hauteur = h;
+    }
+
+    <span class="c1">// Méthodes publiques</span>
+    double aire() {
+        return largeur * hauteur;
+    }
+    double perimetre() {
+        return 2 * (largeur + hauteur);
+    }
+};
+
+<span class="c1">// Utilisation</span>
+Rectangle r(5.0, 3.0);
+std::cout &lt;&lt; r.aire();  <span class="c1">// -&gt; 15</span></pre>
+  <table>
+    <tr><th>Mot-clé</th><th>Effet</th></tr>
+    <tr><td><code>private</code></td><td>Accessible uniquement depuis l'intérieur de la classe (encapsulation)</td></tr>
+    <tr><td><code>public</code></td><td>Accessible depuis l'extérieur de la classe</td></tr>
+    <tr><td><code>protected</code></td><td>Accessible depuis la classe et ses classes filles (voir héritage)</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    L'<strong>encapsulation</strong> consiste à rendre les données internes d'un objet (<code>private</code>) inaccessibles directement de l'extérieur, et à ne les manipuler qu'à travers des méthodes publiques contrôlées. Cela protège la cohérence de l'objet (ex : empêcher une largeur négative).
+  </div>
+
+  <h2 id="c9">9. Héritage et polymorphisme</h2>
+  <pre class="code">class Animal {
+protected:
+    std::string nom;
+public:
+    Animal(std::string n) : nom(n) {}
+    virtual void crier() {
+        std::cout &lt;&lt; nom &lt;&lt; " fait un bruit." &lt;&lt; std::endl;
+    }
+};
+
+class Chien : public Animal {
+public:
+    Chien(std::string n) : Animal(n) {}
+    void crier() override {
+        std::cout &lt;&lt; nom &lt;&lt; " aboie !" &lt;&lt; std::endl;
+    }
+};
+
+<span class="c1">// Polymorphisme : un pointeur d'Animal peut désigner un Chien</span>
+Animal* a = new Chien("Rex");
+a-&gt;crier();  <span class="c1">// -&gt; "Rex aboie !" (la version de Chien est appelée)</span>
+delete a;</pre>
+  <table>
+    <tr><th>Mot-clé</th><th>Rôle</th></tr>
+    <tr><td><code>: public Animal</code></td><td>Chien hérite de tous les membres publics/protégés d'Animal</td></tr>
+    <tr><td><code>virtual</code></td><td>Autorise une classe fille à redéfinir la méthode (liaison dynamique)</td></tr>
+    <tr><td><code>override</code></td><td>Indique explicitement qu'on redéfinit une méthode virtuelle (sécurité à la compilation)</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Sans le mot-clé <code>virtual</code> sur <code>crier()</code> dans <code>Animal</code>, l'appel <code>a-&gt;crier()</code> exécuterait la version d'<code>Animal</code> et non celle de <code>Chien</code>, même si <code>a</code> pointe réellement vers un objet <code>Chien</code> : c'est la différence entre liaison statique et liaison dynamique.
+  </div>
+
+  <div class="plus-divider"><span>Sections suivantes hors programme BTS — pour approfondir</span></div>
+
+  <h2 id="c10">10. La bibliothèque standard : <code>std::vector</code> et templates <span class="badge-plus">+ hors programme</span></h2>
+  <p><code>std::vector</code> est un tableau dynamique (taille modifiable à l'exécution) de la bibliothèque standard (STL), bien plus sûr et pratique qu'un tableau C classique :</p>
+  <pre class="code">#include &lt;vector&gt;
+
+std::vector&lt;int&gt; notes = {12, 15, 8};
+notes.push_back(17);        <span class="c1">// ajoute un élément à la fin</span>
+std::cout &lt;&lt; notes.size();  <span class="c1">// -&gt; 4</span>
+for (int n : notes) {        <span class="c1">// boucle "for each", comme en Python</span>
+    std::cout &lt;&lt; n &lt;&lt; " ";
+}</pre>
+  <p>Les <strong>templates</strong> permettent d'écrire une fonction ou une classe générique, indépendante du type manipulé :</p>
+  <pre class="code">template &lt;typename T&gt;
+T maximum(T a, T b) {
+    return (a &gt; b) ? a : b;
+}
+maximum(3, 7);       <span class="c1">// -&gt; 7 (avec des int)</span>
+maximum(2.5, 1.1);   <span class="c1">// -&gt; 2.5 (avec des double)</span></pre>
+
+  <h2 id="c11">11. Gestion des exceptions <span class="badge-plus">+ hors programme</span></h2>
+  <p>Le mécanisme <code>try / catch / throw</code> permet de gérer proprement les erreurs à l'exécution plutôt que de laisser le programme planter brutalement :</p>
+  <pre class="code">double diviser(double a, double b) {
+    if (b == 0) {
+        throw std::runtime_error("Division par zéro");
+    }
+    return a / b;
+}
+
+try {
+    double r = diviser(10, 0);
+} catch (const std::runtime_error &e) {
+    std::cout &lt;&lt; "Erreur : " &lt;&lt; e.what() &lt;&lt; std::endl;
+}</pre>
+
+  <h2 id="c12">12. RAII et pointeurs intelligents <span class="badge-plus">+ hors programme</span></h2>
+  <p>Oublier un <code>delete</code> après un <code>new</code> provoque une <strong>fuite mémoire</strong>. Le C++ moderne recommande d'éviter <code>new</code>/<code>delete</code> manuels et d'utiliser des <strong>pointeurs intelligents</strong>, qui libèrent automatiquement la mémoire quand ils sortent de portée (principe RAII — Resource Acquisition Is Initialization) :</p>
+  <pre class="code">#include &lt;memory&gt;
+
+std::unique_ptr&lt;Rectangle&gt; r = std::make_unique&lt;Rectangle&gt;(5.0, 3.0);
+std::cout &lt;&lt; r-&gt;aire();
+<span class="c1">// pas besoin de delete : la mémoire est libérée automatiquement
+// quand "r" sort de portée, même en cas d'exception</span></pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    <code>std::unique_ptr</code> = un seul propriétaire de la ressource. <code>std::shared_ptr</code> = plusieurs propriétaires, avec un compteur de références qui libère la mémoire quand il atteint zéro. C'est la norme en C++ moderne (C++11 et plus) pour éviter les fuites mémoire.
+  </div>
+
+  <h2 id="c13">13. Compilation multi-fichiers : <code>.h</code> / <code>.cpp</code> <span class="badge-plus">+ hors programme</span></h2>
+  <p>Un projet réel sépare la <strong>déclaration</strong> (fichier d'en-tête <code>.h</code>/<code>.hpp</code>) de l'<strong>implémentation</strong> (fichier <code>.cpp</code>), pour pouvoir compiler chaque fichier indépendamment et les réutiliser dans plusieurs projets :</p>
+  <pre class="code"><span class="c1">// rectangle.h — déclaration</span>
+class Rectangle {
+public:
+    Rectangle(double l, double h);
+    double aire();
+private:
+    double largeur, hauteur;
+};
+
+<span class="c1">// rectangle.cpp — implémentation</span>
+#include "rectangle.h"
+Rectangle::Rectangle(double l, double h) : largeur(l), hauteur(h) {}
+double Rectangle::aire() { return largeur * hauteur; }
+
+<span class="c1">// main.cpp — utilisation</span>
+#include "rectangle.h"
+int main() {
+    Rectangle r(5, 3);
+    return 0;
+}</pre>
+  <p>Le symbole <code>::</code> (opérateur de résolution de portée) indique à quelle classe appartient la méthode définie dans le <code>.cpp</code>.</p>
+</section>
+
+<!-- ================= EXERCICES ================= -->
+<section class="page" id="exercices">
+  <h1>Exercices d'application</h1>
+  <p class="subtitle">Du basique au cas type examen BTS. Cliquez sur un exercice pour voir l'énoncé, puis dépliez la solution.</p>
+  <div id="exo-list"></div>
+</section>
+
+<!-- ================= REVISIONS ================= -->
+<section class="page" id="revisions">
+  <h1>Révisions interactives</h1>
+  <p class="subtitle">Flashcards pour la mémoire, QCM pour valider vos acquis.</p>
+
+  <h2>📇 Flashcards</h2>
+  <div class="flash-wrap">
+    <div class="flash-card" id="flash-card">
+      <div class="flash-inner">
+        <div class="flash-face flash-front"><p id="flash-front-text"></p></div>
+        <div class="flash-face flash-back"><p id="flash-back-text"></p></div>
+      </div>
+    </div>
+    <div class="flash-controls">
+      <button class="btn" id="flash-prev">← Précédent</button>
+      <span class="flash-count" id="flash-count">1 / 10</span>
+      <button class="btn" id="flash-next">Suivant →</button>
+    </div>
+    <p style="color:var(--text-dim);font-size:.85rem;">Cliquez sur la carte pour la retourner</p>
+  </div>
+
+  <h2>✅ QCM final</h2>
+  <div id="qcm-list"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn primary" id="qcm-submit">Valider mes réponses</button>
+  </div>
+  <div id="qcm-score"></div>
+</section>
+
+<!-- ================= RESSOURCES ================= -->
+<section class="page" id="ressources">
+  <h1>Ressources complémentaires</h1>
+  <p class="subtitle">Pour aller plus loin et s'entraîner en continu.</p>
+
+  <h2>Outils interactifs</h2>
+  <a class="res-link" href="https://godbolt.org" target="_blank" rel="noopener">
+    <div class="res-title">Compiler Explorer (godbolt.org)</div>
+    <div class="res-desc">Compile et exécute du C++ directement dans le navigateur, avec plusieurs compilateurs et standards disponibles.</div>
+    <div class="res-url">godbolt.org</div>
+  </a>
+  <a class="res-link" href="https://www.onlinegdb.com/online_c++_compiler" target="_blank" rel="noopener">
+    <div class="res-title">OnlineGDB — Compilateur C++ en ligne</div>
+    <div class="res-desc">Éditeur en ligne avec débogueur pas-à-pas, pratique pour visualiser l'exécution ligne par ligne.</div>
+    <div class="res-url">onlinegdb.com</div>
+  </a>
+
+  <h2>Documentation officielle et référence</h2>
+  <a class="res-link" href="https://en.cppreference.com" target="_blank" rel="noopener">
+    <div class="res-title">cppreference.com</div>
+    <div class="res-desc">Référence la plus complète et la plus à jour du langage C++ et de sa bibliothèque standard.</div>
+    <div class="res-url">cppreference.com</div>
+  </a>
+  <a class="res-link" href="https://www.learncpp.com" target="_blank" rel="noopener">
+    <div class="res-title">LearnCpp.com</div>
+    <div class="res-desc">Tutoriel complet et très pédagogique, du niveau débutant jusqu'aux notions avancées (templates, STL).</div>
+    <div class="res-url">learncpp.com</div>
+  </a>
+  <a class="res-link" href="https://isocpp.org" target="_blank" rel="noopener">
+    <div class="res-title">Standard C++ Foundation (isocpp.org)</div>
+    <div class="res-desc">Site officiel de la fondation qui supervise l'évolution du standard C++.</div>
+    <div class="res-url">isocpp.org</div>
+  </a>
+
+  <h2>Chaînes / vidéos de référence</h2>
+  <a class="res-link" href="https://www.youtube.com/results?search_query=cours+c%2B%2B+d%C3%A9butant+tutoriel+fran%C3%A7ais" target="_blank" rel="noopener">
+    <div class="res-title">Recherche YouTube — tutoriels C++ en français</div>
+    <div class="res-desc">Recherche préconfigurée pour trouver des tutoriels vidéo récents en français sur le C++.</div>
+    <div class="res-url">youtube.com</div>
+  </a>
+
+  <h2>Aide-mémoire rapide</h2>
+  <div class="grid grid-2">
+    <div class="card"><h4><code>int, double, char, bool</code></h4><p>Types de base</p></div>
+    <div class="card"><h4><code>if / for / while / switch</code></h4><p>Structures de contrôle</p></div>
+    <div class="card"><h4><code>& et *</code></h4><p>Référence et pointeur</p></div>
+    <div class="card"><h4><code>new / delete</code></h4><p>Allocation dynamique</p></div>
+    <div class="card"><h4><code>class, private, public</code></h4><p>Programmation orientée objet</p></div>
+    <div class="card"><h4><code>virtual / override</code></h4><p>Polymorphisme</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>Mini-site généré pour révision BTS CIEL — C++</footer>
+
+<script>
+/* ---------- navigation ---------- */
+const tabs = document.querySelectorAll('nav.tabs button');
+const pages = document.querySelectorAll('section.page');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    pages.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.page).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------- memory visualizer (pointeurs) ---------- */
+const memSteps = [
+  {
+    code:["int a = 10;"],
+    current:0,
+    desc:"On déclare une variable a, stockée quelque part en mémoire (ici, adresse fictive 0x100), qui contient la valeur 10.",
+    vars:[{name:"a", addr:"0x100", val:"10"}]
+  },
+  {
+    code:["int a = 10;","int *p = &a;"],
+    current:1,
+    desc:"On déclare un pointeur p. Grâce à l'opérateur &, p ne contient pas une valeur classique mais l'ADRESSE de a (0x100).",
+    vars:[{name:"a", addr:"0x100", val:"10"}, {name:"p", addr:"0x200", val:"0x100", arrow:"pointe vers a"}]
+  },
+  {
+    code:["int a = 10;","int *p = &a;","std::cout << *p;"],
+    current:2,
+    desc:"*p (déréférencement) va chercher la valeur stockée à l'adresse contenue dans p, donc la valeur de a : on affiche 10.",
+    vars:[{name:"a", addr:"0x100", val:"10"}, {name:"p", addr:"0x200", val:"0x100", arrow:"pointe vers a"}]
+  },
+  {
+    code:["int a = 10;","int *p = &a;","std::cout << *p;","*p = 20;"],
+    current:3,
+    desc:"*p = 20 modifie la valeur stockée à l'adresse pointée par p, donc modifie directement a, qui vaut maintenant 20 !",
+    vars:[{name:"a", addr:"0x100", val:"20", updated:true}, {name:"p", addr:"0x200", val:"0x100", arrow:"pointe vers a"}]
+  },
+  {
+    code:["int a = 10;","int *p = &a;","std::cout << *p;","*p = 20;","int *q = new int(42);"],
+    current:4,
+    desc:"new int(42) réserve une nouvelle case mémoire sur le tas (heap), à une adresse différente (0x900), et q pointe vers elle.",
+    vars:[{name:"a", addr:"0x100", val:"20"}, {name:"p", addr:"0x200", val:"0x100", arrow:"pointe vers a"}, {name:"q", addr:"0x300", val:"0x900", arrow:"pointe vers le tas", updated:true}]
+  },
+  {
+    code:["int a = 10;","int *p = &a;","std::cout << *p;","*p = 20;","int *q = new int(42);","delete q;"],
+    current:5,
+    desc:"delete q libère la mémoire allouée sur le tas. q pointe désormais vers une zone invalide : ne plus l'utiliser sans le réinitialiser (ex : q = nullptr;).",
+    vars:[{name:"a", addr:"0x100", val:"20"}, {name:"p", addr:"0x200", val:"0x100", arrow:"pointe vers a"}, {name:"q", addr:"0x300", val:"???", arrow:"mémoire libérée", updated:true}]
+  }
+];
+let memIndex = 0;
+function renderMem(){
+  const step = memSteps[memIndex];
+  const codeEl = document.getElementById('memviz-code');
+  codeEl.innerHTML = step.code.map((line,i)=>`<div class="line${i===step.current?' current':''}">${line}</div>`).join('');
+  const stackEl = document.getElementById('memviz-stack');
+  stackEl.innerHTML = step.vars.map(v=>`
+    <div class="memcell${v.updated?' updated':''}">
+      <div class="mc-name">${v.name}</div>
+      <div class="mc-addr">${v.addr}</div>
+      <div class="mc-val">${v.val}</div>
+      ${v.arrow?`<div class="mc-arrow">↳ ${v.arrow}</div>`:''}
+    </div>`).join('');
+  document.getElementById('memviz-desc').textContent = step.desc;
+  document.getElementById('memviz-prev').disabled = memIndex === 0;
+  document.getElementById('memviz-next').disabled = memIndex === memSteps.length-1;
+}
+document.getElementById('memviz-next').addEventListener('click', ()=>{
+  if(memIndex < memSteps.length-1){ memIndex++; renderMem(); }
+});
+document.getElementById('memviz-prev').addEventListener('click', ()=>{
+  if(memIndex > 0){ memIndex--; renderMem(); }
+});
+document.getElementById('memviz-reset').addEventListener('click', ()=>{
+  memIndex = 0; renderMem();
+});
+renderMem();
+
+/* ---------- exercices ---------- */
+const exercices = [
+  {
+    level:"Niveau 1",
+    title:"Somme de deux nombres",
+    statement:"Écrire un programme C++ qui demande deux entiers à l'utilisateur (avec <code>std::cin</code>) et affiche leur somme.",
+    solution:"<pre class=\"code\">#include &lt;iostream&gt;\nint main() {\n    int a, b;\n    std::cout &lt;&lt; \"Entrez deux entiers : \";\n    std::cin &gt;&gt; a &gt;&gt; b;\n    std::cout &lt;&lt; \"Somme = \" &lt;&lt; (a + b) &lt;&lt; std::endl;\n    return 0;\n}</pre>"
+  },
+  {
+    level:"Niveau 1",
+    title:"Table de multiplication",
+    statement:"Écrire un programme qui affiche la table de multiplication d'un nombre n (demandé à l'utilisateur), de 1 à 10, à l'aide d'une boucle <code>for</code>.",
+    solution:"<pre class=\"code\">#include &lt;iostream&gt;\nint main() {\n    int n;\n    std::cin &gt;&gt; n;\n    for (int i = 1; i &lt;= 10; i++) {\n        std::cout &lt;&lt; n &lt;&lt; \" x \" &lt;&lt; i &lt;&lt; \" = \" &lt;&lt; (n*i) &lt;&lt; std::endl;\n    }\n    return 0;\n}</pre>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Le plus grand de trois entiers",
+    statement:"Écrire une fonction <code>int maximum(int a, int b, int c)</code> qui renvoie le plus grand des trois entiers passés en paramètre (passage par valeur).",
+    solution:"<pre class=\"code\">int maximum(int a, int b, int c) {\n    int m = a;\n    if (b &gt; m) m = b;\n    if (c &gt; m) m = c;\n    return m;\n}</pre>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Moyenne d'un tableau de notes",
+    statement:"À partir d'un tableau <code>double notes[5] = {12, 8, 15, 10, 17};</code>, écrire une fonction qui calcule et renvoie la moyenne des notes.",
+    solution:"<pre class=\"code\">double moyenne(double t[], int taille) {\n    double somme = 0;\n    for (int i = 0; i &lt; taille; i++) {\n        somme += t[i];\n    }\n    return somme / taille;\n}\n<span class=\"c1\">// appel : moyenne(notes, 5);</span></pre><p>Un tableau statique passé en paramètre de fonction se \"décompose\" en pointeur : il faut donc toujours transmettre sa taille séparément.</p>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"Structure Étudiant et recherche",
+    statement:"Créer une <code>struct Etudiant</code> (nom, moyenne), remplir un tableau de 3 étudiants, puis écrire une fonction qui recherche et renvoie l'étudiant ayant la meilleure moyenne.",
+    solution:"<pre class=\"code\">struct Etudiant {\n    std::string nom;\n    double moyenne;\n};\n\nEtudiant meilleur(Etudiant t[], int taille) {\n    Etudiant best = t[0];\n    for (int i = 1; i &lt; taille; i++) {\n        if (t[i].moyenne &gt; best.moyenne) {\n            best = t[i];\n        }\n    }\n    return best;\n}\n\nint main() {\n    Etudiant classe[3] = {\n        {\"Amir\", 15.5}, {\"Lina\", 17.2}, {\"Sami\", 12.0}\n    };\n    Etudiant top = meilleur(classe, 3);\n    std::cout &lt;&lt; top.nom &lt;&lt; \" a la meilleure moyenne : \" &lt;&lt; top.moyenne;\n}</pre>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"Échanger deux valeurs avec un pointeur",
+    statement:"Écrire une fonction <code>void echanger(int *a, int *b)</code> qui échange le contenu de deux entiers via des pointeurs, puis l'utiliser dans un <code>main</code>.",
+    solution:"<pre class=\"code\">void echanger(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 5, y = 8;\n    echanger(&x, &y);\n    std::cout &lt;&lt; x &lt;&lt; \" \" &lt;&lt; y;  <span class=\"c1\">// -&gt; 8 5</span>\n}</pre><p>C'est l'exemple classique qui montre pourquoi les pointeurs sont indispensables : un passage par valeur simple (sans <code>*</code>) ne modifierait que des copies locales, sans effet sur x et y.</p>"
+  },
+  {
+    level:"Bonus — hors programme",
+    title:"Classe Rectangle",
+    statement:"Créer une classe <code>Rectangle</code> avec attributs privés <code>largeur</code>/<code>hauteur</code>, un constructeur, et des méthodes <code>aire()</code> et <code>perimetre()</code>.",
+    solution:"<pre class=\"code\">class Rectangle {\nprivate:\n    double largeur, hauteur;\npublic:\n    Rectangle(double l, double h) : largeur(l), hauteur(h) {}\n    double aire() { return largeur * hauteur; }\n    double perimetre() { return 2 * (largeur + hauteur); }\n};\n\nint main() {\n    Rectangle r(4, 6);\n    std::cout &lt;&lt; r.aire() &lt;&lt; \" \" &lt;&lt; r.perimetre();\n}</pre>"
+  },
+  {
+    level:"Bonus — hors programme",
+    title:"Héritage Animal / Chien",
+    statement:"Créer une classe <code>Animal</code> avec une méthode virtuelle <code>crier()</code>, puis une classe <code>Chien</code> qui hérite d'<code>Animal</code> et redéfinit <code>crier()</code>. Vérifier le polymorphisme via un pointeur d'<code>Animal</code>.",
+    solution:"<pre class=\"code\">class Animal {\npublic:\n    virtual void crier() { std::cout &lt;&lt; \"...\"; }\n};\nclass Chien : public Animal {\npublic:\n    void crier() override { std::cout &lt;&lt; \"Wouf !\"; }\n};\n\nint main() {\n    Animal* a = new Chien();\n    a-&gt;crier();  <span class=\"c1\">// -&gt; \"Wouf !\" grâce au mot-clé virtual</span>\n    delete a;\n}</pre>"
+  }
+];
+const exoList = document.getElementById('exo-list');
+exercices.forEach((ex)=>{
+  const acc = document.createElement('div');
+  acc.className = 'accordion';
+  acc.innerHTML = `
+    <div class="acc-head">
+      <span><span class="lvl">${ex.level}</span>${ex.title}</span>
+      <span class="acc-arrow">▶</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>${ex.statement}</p>
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;color:var(--amber);font-family:var(--mono);font-size:.85rem;">Voir la solution</summary>
+          <div style="margin-top:10px;">${ex.solution}</div>
+        </details>
+      </div>
+    </div>`;
+  acc.querySelector('.acc-head').addEventListener('click', ()=>acc.classList.toggle('open'));
+  exoList.appendChild(acc);
+});
+
+/* ---------- flashcards ---------- */
+const flashcards = [
+  {q:"Quelle est la différence majeure entre Python et C++ concernant le typage ?", a:"C++ est typé statiquement (le type est fixé à la déclaration et vérifié à la compilation), Python est typé dynamiquement."},
+  {q:"Que fait l'opérateur & devant une variable ?", a:"Il renvoie l'adresse mémoire de cette variable."},
+  {q:"Que fait l'opérateur * devant un pointeur ?", a:"Il déréférence le pointeur : il accède à la valeur stockée à l'adresse pointée."},
+  {q:"Différence entre new/delete et une variable classique ?", a:"new alloue de la mémoire dynamiquement sur le tas (heap), qu'il faut libérer manuellement avec delete, contrairement à une variable locale automatiquement libérée."},
+  {q:"Quelle est la valeur par défaut de l'accès aux membres d'une struct ?", a:"public (contrairement à une class, où c'est private par défaut)."},
+  {q:"Différence entre passage par valeur et passage par référence ?", a:"Par valeur, la fonction reçoit une copie (modifications sans effet sur l'original). Par référence (&), la fonction modifie directement la variable de l'appelant."},
+  {q:"Que fait le mot-clé virtual sur une méthode ?", a:"Il autorise la liaison dynamique : une classe fille peut redéfinir cette méthode, et la bonne version sera appelée même via un pointeur de la classe mère."},
+  {q:"Que garantit le principe RAII avec un unique_ptr ?", a:"La mémoire est libérée automatiquement quand le pointeur intelligent sort de portée, évitant les fuites mémoire."},
+  {q:"Quelle boucle exécute son corps au moins une fois avant de tester la condition ?", a:"La boucle do-while."},
+  {q:"Que se passe-t-il si on oublie 'break' dans un case d'un switch ?", a:"Fall-through : l'exécution continue dans le case suivant, même si sa condition n'est pas remplie."}
+];
+let flashIndex = 0, flipped = false;
+const flashCardEl = document.getElementById('flash-card');
+const flashFront = document.getElementById('flash-front-text');
+const flashBack = document.getElementById('flash-back-text');
+const flashCount = document.getElementById('flash-count');
+function renderFlash(){
+  flashFront.textContent = flashcards[flashIndex].q;
+  flashBack.textContent = flashcards[flashIndex].a;
+  flashCount.textContent = `${flashIndex+1} / ${flashcards.length}`;
+  flashCardEl.classList.remove('flipped');
+  flipped = false;
+}
+flashCardEl.addEventListener('click', ()=>{
+  flipped = !flipped;
+  flashCardEl.classList.toggle('flipped', flipped);
+});
+document.getElementById('flash-next').addEventListener('click', ()=>{
+  flashIndex = (flashIndex+1) % flashcards.length;
+  renderFlash();
+});
+document.getElementById('flash-prev').addEventListener('click', ()=>{
+  flashIndex = (flashIndex-1+flashcards.length) % flashcards.length;
+  renderFlash();
+});
+renderFlash();
+
+/* ---------- QCM ---------- */
+const qcm = [
+  {q:"Que vaut 7 / 2 en C++ si a et b sont des int ?", options:["3.5","3","4","Erreur de compilation"], correct:1},
+  {q:"Quel opérateur récupère l'adresse mémoire d'une variable ?", options:["*","&","->","::"], correct:1},
+  {q:"Quel mot-clé libère une mémoire allouée avec new ?", options:["free","delete","clear","release"], correct:1},
+  {q:"Par défaut, les membres d'une class sont :", options:["public","protected","private","dépend du compilateur"], correct:2},
+  {q:"Quelle boucle garantit au moins une exécution du corps ?", options:["for","while","do-while","switch"], correct:2},
+  {q:"Quel mot-clé permet à une classe fille de redéfinir une méthode avec liaison dynamique ?", options:["override seul","virtual","static","friend"], correct:1},
+  {q:"Que fait std::vector par rapport à un tableau C classique ?", options:["Il est plus lent mais fixe","Il permet une taille dynamique et des méthodes intégrées","Il remplace les pointeurs","Il n'existe qu'en C"], correct:1},
+  {q:"Quel est le rôle du symbole :: dans Rectangle::aire() (fichier .cpp) ?", options:["Créer un commentaire","Résoudre la portée : indiquer que aire() appartient à Rectangle","Déréférencer un pointeur","Terminer une instruction"], correct:1},
+  {q:"Que se passe-t-il si on déréférence un pointeur non initialisé ?", options:["Le programme affiche 0","C'est un comportement indéfini, potentiellement un plantage","Le compilateur refuse de compiler","Rien, c'est sans risque"], correct:1},
+  {q:"Un std::unique_ptr sert principalement à :", options:["Accélérer les boucles","Gérer automatiquement la libération mémoire (RAII)","Remplacer les références","Créer des templates"], correct:1}
+];
+const qcmList = document.getElementById('qcm-list');
+qcm.forEach((item,qi)=>{
+  const div = document.createElement('div');
+  div.className = 'qcm-q';
+  div.innerHTML = `<p class="question">${qi+1}. ${item.q}</p>` +
+    item.options.map((opt,oi)=>`
+      <label class="qcm-opt">
+        <input type="radio" name="q${qi}" value="${oi}">
+        <span>${opt}</span>
+      </label>`).join('') +
+    `<div class="qcm-feedback" id="fb-${qi}"></div>`;
+  qcmList.appendChild(div);
+});
+document.getElementById('qcm-submit').addEventListener('click', ()=>{
+  let score = 0;
+  qcm.forEach((item,qi)=>{
+    const checked = document.querySelector(`input[name="q${qi}"]:checked`);
+    const fb = document.getElementById(`fb-${qi}`);
+    if(!checked){
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = 'Aucune réponse sélectionnée.';
+      return;
+    }
+    if(parseInt(checked.value) === item.correct){
+      score++;
+      fb.className = 'qcm-feedback ok';
+      fb.textContent = '✓ Bonne réponse';
+    }else{
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = '✗ Réponse attendue : ' + item.options[item.correct];
+    }
+  });
+  const scoreEl = document.getElementById('qcm-score');
+  scoreEl.style.display = 'block';
+  scoreEl.innerHTML = `Score : ${score} / ${qcm.length} ${score===qcm.length ? '🎉' : ''}`;
+  scoreEl.scrollIntoView({behavior:'smooth', block:'center'});
+});
+</script>
+</body>
+</html>

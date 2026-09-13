@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex — Cours interactif BTS CIEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d12;
+  --panel:#11161d;
+  --panel-2:#161c25;
+  --border:#232b37;
+  --text:#d5dbe3;
+  --text-dim:#7c8798;
+  --amber:#e3b341;
+  --green:#7ee787;
+  --red:#ff7b72;
+  --blue:#58a6ff;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+}
+::selection{background:var(--amber);color:#0a0d12;}
+
+/* ---- top bar ---- */
+header.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(10,13,18,.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-inner{
+  max-width:1100px;margin:0 auto;padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+.brand{
+  font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.brand .dot{color:var(--amber);}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
+nav.tabs button{
+  font-family:var(--mono);font-size:.82rem;
+  background:none;border:1px solid transparent;color:var(--text-dim);
+  padding:7px 12px;border-radius:6px;cursor:pointer;transition:.15s;
+}
+nav.tabs button:hover{color:var(--text);border-color:var(--border);}
+nav.tabs button.active{color:var(--bg);background:var(--amber);font-weight:600;}
+
+main{max-width:1100px;margin:0 auto;padding:32px 20px 80px;}
+section.page{display:none;animation:fade .25s ease;}
+section.page.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+h1{font-size:1.9rem;margin:0 0 6px;color:#fff;letter-spacing:-.01em;}
+h2{font-size:1.35rem;margin:40px 0 14px;color:#fff;border-bottom:1px solid var(--border);padding-bottom:10px;}
+h2:first-of-type{margin-top:0;}
+h3{font-size:1.05rem;color:var(--amber);margin:24px 0 8px;}
+p{color:var(--text);}
+.subtitle{color:var(--text-dim);font-size:1rem;margin-bottom:28px;}
+code, .mono{font-family:var(--mono);}
+code{background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.88em;color:var(--green);}
+
+/* code blocks */
+pre.code{
+  background:#0d1117;border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;
+  line-height:1.65;color:#c9d1d9;margin:10px 0 18px;
+}
+pre.code .c1{color:var(--text-dim);} /* comment */
+pre.code .tok{color:var(--amber);}
+pre.code .str{color:var(--green);}
+
+/* callout boxes */
+.box{border-left:3px solid; border-radius:6px; padding:12px 16px; margin:16px 0; background:var(--panel);}
+.box-retenir{border-color:var(--green);}
+.box-attention{border-color:var(--red);}
+.box-title{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.03em;margin-bottom:4px;}
+.box-retenir .box-title{color:var(--green);}
+.box-attention .box-title{color:var(--red);}
+
+/* toc / badge / divider */
+.toc-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:0 0 30px;}
+.toc-title{font-family:var(--mono);font-size:.75rem;color:var(--text-dim);letter-spacing:.03em;margin-bottom:10px;}
+.toc-box a{display:inline-block;color:var(--blue);text-decoration:none;font-size:.85rem;margin:0 14px 8px 0;font-family:var(--mono);}
+.toc-box a:hover{text-decoration:underline;}
+.badge-plus{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:#c9a6ff;border:1px solid #6e4fa3;background:rgba(160,120,255,.1);padding:1px 8px;border-radius:20px;vertical-align:middle;letter-spacing:.02em;}
+.plus-divider{display:flex;align-items:center;gap:12px;margin:44px 0 10px;color:var(--text-dim);font-family:var(--mono);font-size:.78rem;}
+.plus-divider::before,.plus-divider::after{content:"";flex:1;height:1px;background:var(--border);}
+
+/* cards / grid */
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.card h4{margin:0 0 6px;font-size:.95rem;color:#fff;}
+.card p{margin:0;color:var(--text-dim);font-size:.88rem;}
+
+/* table cheat sheet */
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:.88rem;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+th{color:var(--text-dim);font-weight:600;font-family:var(--mono);font-size:.78rem;}
+td code{white-space:nowrap;}
+
+/* mindmap */
+.mindmap{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+.mm-row{display:flex;gap:10px;flex-wrap:wrap;}
+.mm-node{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;}
+.mm-node.root{background:var(--amber);color:#0a0d12;font-weight:700;border:none;}
+
+/* accordion */
+.accordion{border:1px solid var(--border);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--panel);}
+.acc-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 16px;cursor:pointer;font-size:.92rem;color:var(--text);
+}
+.acc-head:hover{background:var(--panel-2);}
+.acc-head .lvl{font-family:var(--mono);font-size:.72rem;color:var(--amber);border:1px solid var(--amber);padding:1px 7px;border-radius:20px;margin-right:10px;}
+.acc-arrow{transition:.2s;color:var(--text-dim);}
+.accordion.open .acc-arrow{transform:rotate(90deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .25s ease;border-top:1px solid transparent;}
+.accordion.open .acc-body{max-height:600px;border-top:1px solid var(--border);}
+.acc-body-inner{padding:14px 16px;}
+
+/* flashcards */
+.flash-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.flash-card{
+  width:100%;max-width:480px;height:220px;perspective:1200px;cursor:pointer;
+}
+.flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+.flash-card.flipped .flash-inner{transform:rotateY(180deg);}
+.flash-face{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;
+  border:1px solid var(--border);
+}
+.flash-front{background:var(--panel);}
+.flash-back{background:var(--panel-2);transform:rotateY(180deg);color:var(--green);}
+.flash-face p{font-size:1.05rem;font-family:var(--mono);margin:0;}
+.flash-controls{display:flex;gap:12px;align-items:center;}
+.flash-count{color:var(--text-dim);font-family:var(--mono);font-size:.85rem;}
+
+/* buttons */
+button.btn{
+  font-family:var(--mono);background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  padding:9px 16px;border-radius:7px;cursor:pointer;font-size:.85rem;transition:.15s;
+}
+button.btn:hover{border-color:var(--amber);color:var(--amber);}
+button.btn.primary{background:var(--amber);color:#0a0d12;border:none;font-weight:700;}
+button.btn.primary:hover{opacity:.9;color:#0a0d12;}
+
+/* qcm */
+.qcm-q{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+.qcm-q p.question{margin:0 0 10px;font-weight:600;color:#fff;}
+.qcm-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:4px;}
+.qcm-opt:hover{background:var(--panel-2);}
+.qcm-opt input{accent-color:var(--amber);}
+.qcm-feedback{display:none;font-size:.85rem;margin-top:8px;padding:8px 10px;border-radius:6px;font-family:var(--mono);}
+.qcm-feedback.ok{background:rgba(126,231,135,.1);color:var(--green);display:block;}
+.qcm-feedback.ko{background:rgba(255,123,114,.1);color:var(--red);display:block;}
+#qcm-score{
+  text-align:center;font-family:var(--mono);font-size:1.3rem;padding:20px;border:1px solid var(--border);
+  border-radius:10px;background:var(--panel);display:none;margin-top:20px;
+}
+
+/* regex sandbox */
+.sandbox{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;margin:20px 0;}
+.sandbox label{display:block;font-family:var(--mono);font-size:.75rem;color:var(--text-dim);margin-bottom:5px;text-transform:none;}
+.sandbox input[type=text], .sandbox textarea{
+  width:100%;background:#0d1117;border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:var(--mono);font-size:.9rem;padding:10px 12px;margin-bottom:14px;resize:vertical;
+}
+.sandbox textarea{min-height:80px;}
+.flags-row{display:flex;gap:14px;margin-bottom:14px;font-family:var(--mono);font-size:.82rem;color:var(--text-dim);}
+.flags-row label{display:flex;align-items:center;gap:5px;font-family:var(--mono);}
+#sandbox-result{background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:12px;font-family:var(--mono);font-size:.88rem;white-space:pre-wrap;word-break:break-word;min-height:40px;}
+mark{background:rgba(227,179,65,.35);color:var(--amber);border-radius:3px;}
+
+/* resources */
+.res-link{display:block;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:var(--text);transition:.15s;}
+.res-link:hover{border-color:var(--amber);}
+.res-link .res-title{color:#fff;font-weight:600;font-size:.95rem;}
+.res-link .res-desc{color:var(--text-dim);font-size:.83rem;margin-top:3px;}
+.res-link .res-url{font-family:var(--mono);color:var(--blue);font-size:.78rem;margin-top:4px;}
+
+footer{text-align:center;color:var(--text-dim);font-size:.8rem;padding:30px 20px;font-family:var(--mono);}
+
+@media(max-width:640px){
+  .topbar-inner{flex-direction:column;align-items:flex-start;}
+  nav.tabs{width:100%;overflow-x:auto;}
+  h1{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">/<span class="dot">.*</span>/ <span>regex.cours</span></div>
+    <nav class="tabs">
+      <button data-page="accueil" class="active">Accueil</button>
+      <button data-page="cours">Le Cours</button>
+      <button data-page="exercices">Exercices</button>
+      <button data-page="revisions">Révisions</button>
+      <button data-page="ressources">Ressources</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= ACCUEIL ================= -->
+<section class="page active" id="accueil">
+  <h1>Les expressions régulières (regex)</h1>
+  <p class="subtitle">Décrire, rechercher et transformer du texte grâce à un langage de motifs — niveau BTS CIEL.</p>
+
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Une <strong>regex</strong> (regular expression) est un motif qui décrit un ensemble de chaînes de caractères. Elle sert à <strong>valider</strong>, <strong>rechercher</strong> ou <strong>extraire</strong> de l'information dans du texte (logs, formulaires, fichiers de config, code source...).
+  </div>
+
+  <h2>Objectifs du cours</h2>
+  <div class="grid grid-3">
+    <div class="card"><h4>Comprendre la syntaxe</h4><p>Métacaractères, classes, quantificateurs, ancres, groupes.</p></div>
+    <div class="card"><h4>Écrire des motifs fiables</h4><p>Du cas simple (email) au parsing de logs serveur.</p></div>
+    <div class="card"><h4>Utiliser le module Python <code>re</code></h4><p>match, search, findall, sub, groupes nommés.</p></div>
+    <div class="card"><h4>Éviter les pièges classiques</h4><p>Greedy vs lazy, échappement, cas d'ancrage.</p></div>
+    <div class="card"><h4>S'entraîner en conditions d'examen</h4><p>Exercices progressifs type BTS avec correction.</p></div>
+    <div class="card"><h4>Réviser efficacement</h4><p>Flashcards + QCM chronométrable pour la mémorisation.</p></div>
+  </div>
+
+  <h2>Prérequis</h2>
+  <ul>
+    <li>Bases de la programmation Python (variables, chaînes de caractères, fonctions)</li>
+    <li>Notion de chaîne de caractères et d'indexation (<code>str[i]</code>)</li>
+    <li>Aucune connaissance préalable des regex n'est nécessaire</li>
+  </ul>
+
+  <h2>Carte mentale du cours</h2>
+  <div class="mindmap">
+    <div class="mm-row"><div class="mm-node root">REGEX</div></div>
+    <div class="mm-row">
+      <div class="mm-node">Syntaxe de base<br><span style="color:var(--text-dim);font-size:.78rem">littéraux, métacaractères</span></div>
+      <div class="mm-node">Classes de caractères<br><span style="color:var(--text-dim);font-size:.78rem">[abc], \d \w \s</span></div>
+      <div class="mm-node">Quantificateurs<br><span style="color:var(--text-dim);font-size:.78rem">* + ? {n,m}</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Ancres<br><span style="color:var(--text-dim);font-size:.78rem">^ $ \b</span></div>
+      <div class="mm-node">Groupes & alternance<br><span style="color:var(--text-dim);font-size:.78rem">(...), (?:...), |</span></div>
+      <div class="mm-node">Lookaround<br><span style="color:var(--text-dim);font-size:.78rem">(?=) (?!) (?<=) (?<!)</span></div>
+    </div>
+    <div class="mm-row">
+      <div class="mm-node">Flags<br><span style="color:var(--text-dim);font-size:.78rem">i, m, s, g</span></div>
+      <div class="mm-node">Module Python re<br><span style="color:var(--text-dim);font-size:.78rem">match, search, findall, sub</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COURS ================= -->
+<section class="page" id="cours">
+  <h1>Le cours structuré</h1>
+  <p class="subtitle">Programme BTS CIEL couvert intégralement (sections 1 à 9), puis des approfondissements signalés <span class="badge-plus">+ hors programme</span> pour aller plus loin (sections 10 à 13).</p>
+
+  <div class="toc-box">
+    <div class="toc-title">Sommaire</div>
+    <a href="#c1">1. Introduction</a>
+    <a href="#c2">2. Littéraux et métacaractères</a>
+    <a href="#c3">3. Classes de caractères</a>
+    <a href="#c4">4. Quantificateurs</a>
+    <a href="#c5">5. Ancres</a>
+    <a href="#c6">6. Groupes, capture, alternance</a>
+    <a href="#c7">7. Lookaround</a>
+    <a href="#c8">8. Flags</a>
+    <a href="#c9">9. Module Python re</a>
+    <a href="#c10">10. ReDoS <span class="badge-plus">+</span></a>
+    <a href="#c11">11. Regex selon les langages <span class="badge-plus">+</span></a>
+    <a href="#c12">12. Regex lisibles (VERBOSE) <span class="badge-plus">+</span></a>
+    <a href="#c13">13. Étude de cas : mot de passe <span class="badge-plus">+</span></a>
+  </div>
+
+  <h2 id="c1">1. Introduction : à quoi servent les regex ?</h2>
+  <p>Une regex est un <strong>langage de motifs</strong> utilisé pour trois opérations principales : <strong>valider</strong> une chaîne (format d'un email), <strong>rechercher</strong> une occurrence dans un texte (trouver toutes les adresses IP d'un log), et <strong>remplacer</strong> du texte (anonymiser des numéros de téléphone). On les retrouve dans presque tous les langages : Python (<code>re</code>), JavaScript (<code>RegExp</code>), les commandes Unix <code>grep</code>/<code>sed</code>/<code>awk</code>, les éditeurs de code (recherche/remplacement avancée), les bases de données (<code>REGEXP</code> en SQL), et la validation de formulaires web.</p>
+  <p>Une regex se construit en assemblant deux types de briques :</p>
+  <ul>
+    <li><strong>des caractères littéraux</strong> qui se représentent eux-mêmes (<code>a</code>, <code>3</code>, <code>-</code>) ;</li>
+    <li><strong>des métacaractères</strong> qui portent un sens spécial (répétition, alternative, position...).</li>
+  </ul>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Un <strong>moteur de regex</strong> lit le texte caractère par caractère et essaie de faire correspondre le motif à partir de chaque position possible, jusqu'à trouver une correspondance ou épuiser le texte. Comprendre ce fonctionnement séquentiel aide à anticiper le comportement d'un motif complexe.
+  </div>
+
+  <h2 id="c2">2. Syntaxe de base : littéraux et métacaractères</h2>
+  <p>Un caractère normal (lettre, chiffre) se représente <strong>lui-même</strong> : la regex <code>chat</code> trouve exactement la sous-chaîne "chat", où qu'elle soit dans le texte (sauf si elle est ancrée, voir section 5). Les <strong>métacaractères</strong> ont un sens spécial et doivent être échappés avec <code>\</code> si on veut les utiliser littéralement.</p>
+  <table>
+    <tr><th>Métacaractère</th><th>Signification</th></tr>
+    <tr><td><code>.</code></td><td>N'importe quel caractère (sauf retour à la ligne, par défaut)</td></tr>
+    <tr><td><code>^</code></td><td>Début de chaîne (ou de ligne en mode multiligne)</td></tr>
+    <tr><td><code>$</code></td><td>Fin de chaîne (ou de ligne en mode multiligne)</td></tr>
+    <tr><td><code>\</code></td><td>Échappement d'un métacaractère ou début d'une classe raccourcie</td></tr>
+    <tr><td><code>* + ? {}</code></td><td>Quantificateurs (répétition)</td></tr>
+    <tr><td><code>[ ]</code></td><td>Classe de caractères</td></tr>
+    <tr><td><code>( )</code></td><td>Groupe (capturant par défaut)</td></tr>
+    <tr><td><code>|</code></td><td>Alternance (OU)</td></tr>
+  </table>
+  <p>Liste complète des caractères à échapper s'ils doivent être utilisés littéralement : <code>. ^ $ * + ? { } [ ] \ | ( )</code>.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Pour chercher un point littéral dans une adresse IP, il faut écrire <code>\.</code> et non <code>.</code>, qui matcherait n'importe quel caractère. De même, pour chercher un <code>+</code> littéral (ex : un numéro international <code>+33...</code>), il faut écrire <code>\+</code>.
+  </div>
+  <p><strong>Exemple comparatif :</strong> sur le texte <code>"192.168.1.1"</code>, la regex <code>192.168.1.1</code> (point non échappé) matche aussi <code>"192a168a1a1"</code>, car <code>.</code> accepte n'importe quel caractère. La regex correcte est <code>192\.168\.1\.1</code>.</p>
+
+  <h2 id="c3">3. Classes de caractères</h2>
+  <p>Une classe <code>[...]</code> représente <strong>un seul caractère</strong> parmi un ensemble donné.</p>
+  <pre class="code">[abc]      <span class="c1"># a, b ou c</span>
+[^abc]     <span class="c1"># tout sauf a, b ou c (négation)</span>
+[a-z]      <span class="c1"># une lettre minuscule</span>
+[A-Za-z0-9]<span class="c1"># une lettre ou un chiffre</span>
+[a-zA-Z0-9_-]<span class="c1"># lettres, chiffres, underscore ou tiret</span></pre>
+  <p>Raccourcis très utilisés (équivalents en majuscule = négation) :</p>
+  <table>
+    <tr><th>Raccourci</th><th>Équivaut à</th><th>Signification</th></tr>
+    <tr><td><code>\d</code></td><td><code>[0-9]</code></td><td>Un chiffre</td></tr>
+    <tr><td><code>\D</code></td><td><code>[^0-9]</code></td><td>Tout sauf un chiffre</td></tr>
+    <tr><td><code>\w</code></td><td><code>[A-Za-z0-9_]</code></td><td>Caractère "mot"</td></tr>
+    <tr><td><code>\W</code></td><td><code>[^A-Za-z0-9_]</code></td><td>Tout sauf un caractère mot</td></tr>
+    <tr><td><code>\s</code></td><td><code>[ \t\n\r\f\v]</code></td><td>Espace, tabulation, saut de ligne</td></tr>
+    <tr><td><code>\S</code></td><td></td><td>Tout sauf un espace</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — le tiret dans une classe</div>
+    À l'intérieur de <code>[...]</code>, le tiret <code>-</code> sert normalement à définir un intervalle (<code>a-z</code>). Pour l'utiliser littéralement, placez-le en <strong>premier</strong> ou en <strong>dernier</strong> de la classe : <code>[a-z-]</code> matche une minuscule OU un tiret. De même, <code>^</code> n'a un sens de négation que s'il est <strong>en première position</strong> de la classe ; ailleurs, c'est un caractère littéral : <code>[a^z]</code> matche "a", "^" ou "z".
+  </div>
+  <p><strong>Exemple :</strong> valider un code postal français à 5 chiffres : <code>[0-9]{5}</code> ou, de façon équivalente, <code>\d{5}</code>.</p>
+
+  <h2 id="c4">4. Quantificateurs</h2>
+  <table>
+    <tr><th>Symbole</th><th>Signification</th></tr>
+    <tr><td><code>*</code></td><td>0 fois ou plus</td></tr>
+    <tr><td><code>+</code></td><td>1 fois ou plus</td></tr>
+    <tr><td><code>?</code></td><td>0 ou 1 fois (rend aussi un quantificateur "paresseux" s'il suit un autre quantificateur)</td></tr>
+    <tr><td><code>{n}</code></td><td>Exactement n fois</td></tr>
+    <tr><td><code>{n,}</code></td><td>Au moins n fois</td></tr>
+    <tr><td><code>{n,m}</code></td><td>Entre n et m fois (inclus)</td></tr>
+  </table>
+  <p><strong>Exemples comparés</strong> sur la chaîne <code>"aaa"</code> :</p>
+  <table>
+    <tr><th>Motif</th><th>Résultat sur "aaa"</th></tr>
+    <tr><td><code>a*</code></td><td>Matche "aaa" (et matcherait aussi une chaîne vide)</td></tr>
+    <tr><td><code>a+</code></td><td>Matche "aaa" (au moins 1 "a" requis)</td></tr>
+    <tr><td><code>a{2}</code></td><td>Matche "aa" seulement (exactement 2)</td></tr>
+    <tr><td><code>a{1,2}</code></td><td>Matche "aa" (2 premiers "a", le maximum autorisé)</td></tr>
+  </table>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — greedy vs lazy</div>
+    Par défaut, les quantificateurs sont <strong>gourmands (greedy)</strong> : ils capturent le maximum possible, puis "rendent" des caractères si besoin pour que le reste du motif corresponde (backtracking). <code>&lt;.*&gt;</code> sur <code>&lt;b&gt;texte&lt;/b&gt;</code> capture tout jusqu'au <strong>dernier</strong> <code>&gt;</code> : <code>"&lt;b&gt;texte&lt;/b&gt;"</code>. En ajoutant <code>?</code> après le quantificateur (<code>.*?</code>), il devient <strong>paresseux (lazy)</strong> et s'arrête à la <strong>première</strong> correspondance possible : <code>"&lt;b&gt;"</code>.
+  </div>
+  <p>Chaque quantificateur possède sa version paresseuse : <code>*?</code>, <code>+?</code>, <code>??</code>, <code>{n,m}?</code>.</p>
+
+  <h2 id="c5">5. Ancres</h2>
+  <table>
+    <tr><th>Ancre</th><th>Signification</th></tr>
+    <tr><td><code>^</code></td><td>Début de chaîne (ou de ligne si flag multiligne)</td></tr>
+    <tr><td><code>$</code></td><td>Fin de chaîne (ou de ligne si flag multiligne)</td></tr>
+    <tr><td><code>\b</code></td><td>Frontière de mot (limite entre \w et non-\w)</td></tr>
+    <tr><td><code>\B</code></td><td>Absence de frontière de mot</td></tr>
+  </table>
+  <p>Exemple : <code>\bchat\b</code> trouve "chat" mais pas "chaton" ni "achat", car il n'y a pas de frontière de mot entre les lettres.</p>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Sans ancre, une regex peut correspondre à <strong>n'importe quelle sous-chaîne</strong> du texte. <code>\d{3}</code> trouve "123" dans "a123b". Avec les ancres <code>^\d{3}$</code>, la chaîne <strong>entière</strong> doit être composée de 3 chiffres, ni plus ni moins.
+  </div>
+
+  <h2 id="c6">6. Groupes, capture et alternance</h2>
+  <pre class="code">(abc)      <span class="c1"># groupe capturant n°1</span>
+(?:abc)    <span class="c1"># groupe non capturant (regroupe sans créer de référence)</span>
+(a|b)      <span class="c1"># alternance : a OU b</span>
+(?P&lt;jour&gt;\d{2})<span class="c1"># groupe nommé (Python)</span></pre>
+  <p>Les groupes capturants permettent de <strong>récupérer une sous-partie</strong> du texte trouvé (ex : extraire le nom de domaine d'une URL) et de réutiliser une valeur ailleurs dans le motif via une <strong>rétro-référence</strong> comme <code>\1</code> (qui désigne le contenu déjà capturé par le premier groupe).</p>
+  <p><strong>Exemple de rétro-référence :</strong> détecter un mot répété deux fois de suite, comme "le le" : <code>\b(\w+)\s+\1\b</code>. Le <code>\1</code> impose que le deuxième mot soit <strong>identique</strong> au premier groupe capturé.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION — numérotation des groupes</div>
+    Les groupes capturants sont numérotés de gauche à droite, selon la position de leur parenthèse <strong>ouvrante</strong>, même s'ils sont imbriqués. Dans <code>((a)(b))</code>, le groupe 1 est <code>(a)(b)</code>, le groupe 2 est <code>(a)</code>, le groupe 3 est <code>(b)</code>.
+  </div>
+  <p>L'alternance <code>|</code> s'applique à <strong>tout ce qui l'entoure</strong> dans le groupe ou dans la portée courante : <code>gris|grise</code> hors groupe matche "gris" OU "grise" indépendamment d'un éventuel contexte, alors que <code>gris(e)?</code> factorise le motif.</p>
+
+  <h2 id="c7">7. Lookahead et lookbehind (assertions)</h2>
+  <p>Ces motifs vérifient un contexte <strong>sans le consommer</strong> (il n'apparaît pas dans le résultat capturé) :</p>
+  <table>
+    <tr><th>Motif</th><th>Nom</th><th>Signification</th></tr>
+    <tr><td><code>(?=...)</code></td><td>Lookahead positif</td><td>Suivi de ...</td></tr>
+    <tr><td><code>(?!...)</code></td><td>Lookahead négatif</td><td>Non suivi de ...</td></tr>
+    <tr><td><code>(?&lt;=...)</code></td><td>Lookbehind positif</td><td>Précédé de ...</td></tr>
+    <tr><td><code>(?&lt;!...)</code></td><td>Lookbehind négatif</td><td>Non précédé de ...</td></tr>
+  </table>
+  <p>Exemple : <code>\d+(?=€)</code> capture un nombre uniquement s'il est suivi du symbole €, sans inclure le € dans le résultat. Sur <code>"12kg et 89€"</code>, seul <code>"89"</code> est trouvé.</p>
+  <p>Autre exemple utile : <code>(?&lt;=@)\w+</code> capture le nom de domaine juste après le <code>@</code> d'un email, sans inclure le <code>@</code>.</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    En Python, le lookbehind <code>(?&lt;=...)</code> doit obligatoirement porter sur un motif de <strong>longueur fixe</strong> (pas de <code>*</code> ou <code>+</code> à l'intérieur), contrairement au lookahead qui accepte une longueur variable.
+  </div>
+
+  <h2 id="c8">8. Flags (modificateurs)</h2>
+  <table>
+    <tr><th>Flag</th><th>Python</th><th>Effet</th></tr>
+    <tr><td><code>i</code></td><td><code>re.IGNORECASE</code></td><td>Ignore la casse (majuscules/minuscules)</td></tr>
+    <tr><td><code>m</code></td><td><code>re.MULTILINE</code></td><td><code>^</code>/<code>$</code> matchent chaque ligne, pas juste la chaîne entière</td></tr>
+    <tr><td><code>s</code></td><td><code>re.DOTALL</code></td><td><code>.</code> matche aussi le saut de ligne</td></tr>
+    <tr><td><code>g</code></td><td>(implicite en Python via findall/finditer)</td><td>Recherche globale, toutes les occurrences</td></tr>
+  </table>
+  <p>Plusieurs flags peuvent se combiner : en Python, <code>re.search(motif, texte, re.IGNORECASE | re.MULTILINE)</code>.</p>
+
+  <h2 id="c9">9. Le module <code>re</code> en Python</h2>
+  <pre class="code"><span class="c1">import re</span>
+
+<span class="c1"># match : vérifie le DÉBUT de la chaîne uniquement</span>
+re.match(r"\d+", "42 pommes")        <span class="c1"># -&gt; trouve "42"</span>
+re.match(r"\d+", "il y a 42 pommes") <span class="c1"># -&gt; None (ne commence pas par un chiffre)</span>
+
+<span class="c1"># fullmatch : la chaîne ENTIÈRE doit correspondre</span>
+re.fullmatch(r"\d+", "42")     <span class="c1"># -&gt; correspond</span>
+re.fullmatch(r"\d+", "42 ")    <span class="c1"># -&gt; None (espace en trop)</span>
+
+<span class="c1"># search : cherche n'importe où dans la chaîne, renvoie la 1ère occurrence</span>
+re.search(r"\d+", "j'ai 42 pommes")  <span class="c1"># -&gt; trouve "42"</span>
+
+<span class="c1"># findall : renvoie TOUTES les occurrences (sous forme de liste)</span>
+re.findall(r"\d+", "3 chats, 12 chiens") <span class="c1"># -&gt; ['3', '12']</span>
+
+<span class="c1"># finditer : comme findall, mais renvoie des objets Match (position, groupes...)</span>
+for m in re.finditer(r"\d+", "3 chats, 12 chiens"):
+    print(m.group(), m.start(), m.end())
+
+<span class="c1"># sub : remplace toutes les occurrences</span>
+re.sub(r"\d+", "N", "3 chats, 12 chiens")<span class="c1"># -&gt; "N chats, N chiens"</span>
+re.sub(r"\d+", "N", "3 chats, 12 chiens", count=1)<span class="c1"># -&gt; "N chats, 12 chiens"</span>
+
+<span class="c1"># split : découpe une chaîne selon un motif</span>
+re.split(r"\s*,\s*", "pomme, poire,banane")<span class="c1"># -&gt; ['pomme', 'poire', 'banane']</span>
+
+<span class="c1"># compile : pré-compile le motif (perf si réutilisé plusieurs fois)</span>
+motif = re.compile(r"(?P&lt;code&gt;\d{5})\s(?P&lt;ville&gt;\w+)")
+m = motif.search("75001 Paris")
+m.group("code")   <span class="c1"># -&gt; "75001"</span>
+m.group("ville")  <span class="c1"># -&gt; "Paris"</span>
+m.groupdict()     <span class="c1"># -&gt; {'code': '75001', 'ville': 'Paris'}</span></pre>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Utilisez toujours des chaînes <strong>brutes</strong> (<code>r"..."</code>) en Python pour écrire une regex : cela évite les conflits entre l'échappement Python (<code>\n</code>) et l'échappement regex (<code>\d</code>). Sans le <code>r</code>, <code>"\d"</code> peut fonctionner par chance, mais <code>"\b"</code> par exemple sera interprété comme un retour arrière (backspace) par Python et non comme une frontière de mot.
+  </div>
+  <table>
+    <tr><th>Fonction</th><th>Rôle</th></tr>
+    <tr><td><code>re.match</code></td><td>Teste le motif au tout début de la chaîne</td></tr>
+    <tr><td><code>re.fullmatch</code></td><td>Teste le motif sur la chaîne entière</td></tr>
+    <tr><td><code>re.search</code></td><td>Cherche la première occurrence n'importe où</td></tr>
+    <tr><td><code>re.findall</code></td><td>Renvoie toutes les occurrences (liste)</td></tr>
+    <tr><td><code>re.finditer</code></td><td>Renvoie toutes les occurrences (itérateur d'objets Match)</td></tr>
+    <tr><td><code>re.sub</code></td><td>Remplace les occurrences</td></tr>
+    <tr><td><code>re.split</code></td><td>Découpe une chaîne selon le motif</td></tr>
+    <tr><td><code>re.compile</code></td><td>Pré-compile un motif réutilisable</td></tr>
+  </table>
+
+  <h3>🧪 Bac à sable : testez vos regex en direct</h3>
+  <div class="sandbox">
+    <label>Motif (sans les slashs)</label>
+    <input type="text" id="sb-pattern" value="\d+" class="mono">
+    <div class="flags-row">
+      <label><input type="checkbox" id="sb-i"> i (ignoreCase)</label>
+      <label><input type="checkbox" id="sb-m"> m (multiline)</label>
+      <label><input type="checkbox" id="sb-s"> s (dotAll)</label>
+    </div>
+    <label>Texte à tester</label>
+    <textarea id="sb-text">Commande #4821 passée le 12/09/2026, montant 89€.</textarea>
+    <label>Résultat</label>
+    <div id="sandbox-result"></div>
+  </div>
+
+  <div class="plus-divider"><span>Sections suivantes hors programme BTS — pour approfondir</span></div>
+
+  <h2 id="c10">10. Backtracking catastrophique et ReDoS <span class="badge-plus">+ hors programme</span></h2>
+  <p>Certains motifs mal écrits, combinant des quantificateurs imbriqués comme <code>(a+)+</code> ou <code>(a|aa)+</code>, peuvent provoquer une explosion du nombre de tentatives du moteur de regex face à une entrée qui ne correspond pas exactement (backtracking catastrophique). Sur une entrée de quelques dizaines de caractères bien choisie, le temps de calcul peut devenir exponentiel et bloquer une application : c'est une vraie faille de sécurité appelée <strong>ReDoS</strong> (Regular Expression Denial of Service).</p>
+  <div class="box box-attention">
+    <div class="box-title">ATTENTION</div>
+    Évitez d'imbriquer deux quantificateurs qui peuvent matcher la même chose (<code>(a+)+</code>, <code>(a*)*</code>). Préférez des motifs qui ne laissent pas d'ambiguïté sur la façon de "découper" le texte, ou utilisez des outils comme regex101 (mode "debugger") pour visualiser le nombre d'étapes exécutées par le moteur.
+  </div>
+
+  <h2 id="c11">11. Les regex selon les langages/outils <span class="badge-plus">+ hors programme</span></h2>
+  <p>La logique générale des regex est portable, mais la syntaxe varie légèrement d'un moteur à l'autre (on parle de "saveurs" ou <em>flavors</em>) :</p>
+  <table>
+    <tr><th>Aspect</th><th>Python (<code>re</code>)</th><th>JavaScript (<code>RegExp</code>)</th><th>grep POSIX étendu (<code>grep -E</code>)</th></tr>
+    <tr><td>Groupe nommé</td><td><code>(?P&lt;nom&gt;...)</code></td><td><code>(?&lt;nom&gt;...)</code></td><td>non supporté</td></tr>
+    <tr><td>Lookbehind</td><td>oui (longueur fixe)</td><td>oui (moteurs récents)</td><td>non supporté</td></tr>
+    <tr><td>Flag global</td><td>implicite (findall)</td><td>flag <code>g</code> explicite</td><td>comportement par défaut</td></tr>
+    <tr><td>\d \w \s</td><td>oui</td><td>oui</td><td>non (utiliser <code>[0-9]</code>, <code>[[:alpha:]]</code>...)</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    Toujours vérifier dans quel environnement une regex va s'exécuter avant de la copier d'un outil à l'autre : un motif qui fonctionne dans regex101 en mode Python ne fonctionnera pas forcément tel quel avec <code>grep</code> en shell.
+  </div>
+
+  <h2 id="c12">12. Écrire des regex lisibles avec <code>re.VERBOSE</code> <span class="badge-plus">+ hors programme</span></h2>
+  <p>Un motif complexe devient vite illisible sur une seule ligne. Le flag <code>re.VERBOSE</code> (ou <code>re.X</code>) permet d'ajouter des espaces et des commentaires dans le motif, ignorés à l'exécution :</p>
+  <pre class="code">import re
+
+motif = re.compile(r"""
+    ^(?P&lt;code&gt;\d{5})   <span class="c1"># code postal, 5 chiffres</span>
+    \s+                 <span class="c1"># un ou plusieurs espaces</span>
+    (?P&lt;ville&gt;[A-Za-zÀ-ÿ\-\s]+)$  <span class="c1"># nom de ville</span>
+""", re.VERBOSE)</pre>
+  <p>Cette approche est très utile en entreprise pour documenter un motif complexe directement dans le code, sans dépendre d'un commentaire séparé qui risque de devenir obsolète.</p>
+
+  <h2 id="c13">13. Étude de cas : valider un mot de passe robuste <span class="badge-plus">+ hors programme</span></h2>
+  <p>Cahier des charges : au moins 8 caractères, une majuscule, une minuscule, un chiffre, un caractère spécial. On combine plusieurs <strong>lookaheads positifs</strong> ancrés en début de chaîne, chacun vérifiant une condition indépendamment, puis un motif final qui consomme la chaîne :</p>
+  <pre class="code">^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$</pre>
+  <table>
+    <tr><th>Bloc</th><th>Rôle</th></tr>
+    <tr><td><code>(?=.*[a-z])</code></td><td>Vérifie la présence d'au moins une minuscule, n'importe où</td></tr>
+    <tr><td><code>(?=.*[A-Z])</code></td><td>Vérifie la présence d'au moins une majuscule</td></tr>
+    <tr><td><code>(?=.*\d)</code></td><td>Vérifie la présence d'au moins un chiffre</td></tr>
+    <tr><td><code>(?=.*[^\w\s])</code></td><td>Vérifie la présence d'au moins un caractère spécial</td></tr>
+    <tr><td><code>.{8,}$</code></td><td>Longueur minimale de 8, consomme réellement la chaîne</td></tr>
+  </table>
+  <div class="box box-retenir">
+    <div class="box-title">À RETENIR</div>
+    C'est l'exemple type qui montre la puissance des lookaheads : chaque condition est vérifiée <strong>indépendamment</strong>, sans imposer d'ordre entre la majuscule, le chiffre et le caractère spécial, contrairement à ce qu'un motif "linéaire" classique pourrait imposer.
+  </div>
+</section>
+
+
+<!-- ================= EXERCICES ================= -->
+<section class="page" id="exercices">
+  <h1>Exercices d'application</h1>
+  <p class="subtitle">Du basique au cas type examen BTS. Cliquez sur un exercice pour voir l'énoncé, puis dépliez la solution.</p>
+
+  <div id="exo-list"></div>
+</section>
+
+<!-- ================= REVISIONS ================= -->
+<section class="page" id="revisions">
+  <h1>Révisions interactives</h1>
+  <p class="subtitle">Flashcards pour la mémoire, QCM pour valider vos acquis.</p>
+
+  <h2>📇 Flashcards</h2>
+  <div class="flash-wrap">
+    <div class="flash-card" id="flash-card">
+      <div class="flash-inner">
+        <div class="flash-face flash-front"><p id="flash-front-text"></p></div>
+        <div class="flash-face flash-back"><p id="flash-back-text"></p></div>
+      </div>
+    </div>
+    <div class="flash-controls">
+      <button class="btn" id="flash-prev">← Précédent</button>
+      <span class="flash-count" id="flash-count">1 / 10</span>
+      <button class="btn" id="flash-next">Suivant →</button>
+    </div>
+    <p style="color:var(--text-dim);font-size:.85rem;">Cliquez sur la carte pour la retourner</p>
+  </div>
+
+  <h2>✅ QCM final</h2>
+  <div id="qcm-list"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn primary" id="qcm-submit">Valider mes réponses</button>
+  </div>
+  <div id="qcm-score"></div>
+</section>
+
+<!-- ================= RESSOURCES ================= -->
+<section class="page" id="ressources">
+  <h1>Ressources complémentaires</h1>
+  <p class="subtitle">Pour aller plus loin et s'entraîner en continu.</p>
+
+  <h2>Outils interactifs</h2>
+  <a class="res-link" href="https://regex101.com" target="_blank" rel="noopener">
+    <div class="res-title">regex101.com</div>
+    <div class="res-desc">Testeur de regex en ligne avec explication motif par motif, très utilisé en entreprise.</div>
+    <div class="res-url">regex101.com</div>
+  </a>
+  <a class="res-link" href="https://regexone.com" target="_blank" rel="noopener">
+    <div class="res-title">RegexOne</div>
+    <div class="res-desc">Tutoriel interactif pas à pas pour s'entraîner à écrire des motifs progressivement.</div>
+    <div class="res-url">regexone.com</div>
+  </a>
+  <a class="res-link" href="https://regexcrossword.com" target="_blank" rel="noopener">
+    <div class="res-title">Regex Crossword</div>
+    <div class="res-desc">Mots-croisés basés sur des regex — ludique pour consolider la lecture de motifs.</div>
+    <div class="res-url">regexcrossword.com</div>
+  </a>
+
+  <h2>Documentation officielle</h2>
+  <a class="res-link" href="https://docs.python.org/3/library/re.html" target="_blank" rel="noopener">
+    <div class="res-title">Documentation Python — module re</div>
+    <div class="res-desc">Référence complète des fonctions, flags et syntaxes du module standard Python.</div>
+    <div class="res-url">docs.python.org/3/library/re.html</div>
+  </a>
+  <a class="res-link" href="https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Regular_expressions" target="_blank" rel="noopener">
+    <div class="res-title">MDN — Expressions régulières (JavaScript)</div>
+    <div class="res-desc">Référence complète pour la syntaxe RegExp côté JavaScript / navigateur.</div>
+    <div class="res-url">developer.mozilla.org</div>
+  </a>
+
+  <h2>Chaînes / vidéos de référence</h2>
+  <a class="res-link" href="https://www.youtube.com/results?search_query=regex+expressions+r%C3%A9guli%C3%A8res+tutoriel+fran%C3%A7ais" target="_blank" rel="noopener">
+    <div class="res-title">Recherche YouTube — tutoriels regex en français</div>
+    <div class="res-desc">Recherche préconfigurée pour trouver des tutoriels vidéo récents en français sur les regex.</div>
+    <div class="res-url">youtube.com</div>
+  </a>
+
+  <h2>Aide-mémoire rapide</h2>
+  <div class="grid grid-2">
+    <div class="card"><h4><code>\d \w \s</code></h4><p>Chiffre, caractère mot, espace</p></div>
+    <div class="card"><h4><code>* + ? {n,m}</code></h4><p>Quantificateurs</p></div>
+    <div class="card"><h4><code>^ $ \b</code></h4><p>Ancres</p></div>
+    <div class="card"><h4><code>(...) (?:...) |</code></h4><p>Groupes et alternance</p></div>
+    <div class="card"><h4><code>(?=) (?!) (?&lt;=) (?&lt;!)</code></h4><p>Lookaround</p></div>
+    <div class="card"><h4><code>re.findall / re.sub</code></h4><p>Fonctions Python les plus courantes</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>Mini-site généré pour révision BTS CIEL — Regex</footer>
+
+<script>
+/* ---------- navigation ---------- */
+const tabs = document.querySelectorAll('nav.tabs button');
+const pages = document.querySelectorAll('section.page');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    pages.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.page).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------- regex sandbox ---------- */
+function runSandbox(){
+  const patternEl = document.getElementById('sb-pattern');
+  const textEl = document.getElementById('sb-text');
+  const resEl = document.getElementById('sandbox-result');
+  let flags = 'g';
+  if(document.getElementById('sb-i').checked) flags += 'i';
+  if(document.getElementById('sb-m').checked) flags += 'm';
+  if(document.getElementById('sb-s').checked) flags += 's';
+  const text = textEl.value;
+  try{
+    const re = new RegExp(patternEl.value, flags);
+    let matches = [...text.matchAll(re)];
+    if(matches.length === 0){
+      resEl.innerHTML = '<span style="color:var(--text-dim)">Aucune correspondance</span>';
+      return;
+    }
+    let highlighted = '';
+    let lastIndex = 0;
+    matches.forEach(m=>{
+      highlighted += escapeHtml(text.slice(lastIndex, m.index));
+      highlighted += '<mark>' + escapeHtml(m[0]) + '</mark>';
+      lastIndex = m.index + m[0].length;
+    });
+    highlighted += escapeHtml(text.slice(lastIndex));
+    let details = matches.map((m,i)=>`match ${i+1}: "${m[0]}"${m.length>1 ? ' | groupes: ' + m.slice(1).map(g=>`"${g}"`).join(', ') : ''}`).join('\n');
+    resEl.innerHTML = highlighted + '\n\n' + escapeHtml(details);
+  }catch(e){
+    resEl.innerHTML = '<span style="color:var(--red)">Motif invalide : ' + escapeHtml(e.message) + '</span>';
+  }
+}
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+['sb-pattern','sb-text','sb-i','sb-m','sb-s'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', runSandbox);
+  document.getElementById(id).addEventListener('change', runSandbox);
+});
+runSandbox();
+
+/* ---------- exercices ---------- */
+const exercices = [
+  {
+    level:"Niveau 1",
+    title:"Valider un prénom",
+    statement:"Écrire une regex qui valide un prénom commençant par une majuscule, suivi uniquement de lettres minuscules (ex : « Amir » valide, « amir » ou « Amir1 » invalide).",
+    solution:"<pre class=\"code\">^[A-Z][a-z]*$</pre><p><code>^</code> et <code>$</code> ancrent le début et la fin, <code>[A-Z]</code> impose une majuscule initiale, <code>[a-z]*</code> autorise zéro ou plusieurs minuscules ensuite.</p>"
+  },
+  {
+    level:"Niveau 1",
+    title:"Extraire tous les nombres",
+    statement:"À partir de la chaîne <code>\"3 chats, 12 chiens et 108 poissons\"</code>, extraire tous les nombres avec <code>re.findall</code>.",
+    solution:"<pre class=\"code\">import re\nre.findall(r\"\\d+\", \"3 chats, 12 chiens et 108 poissons\")\n<span class=\"c1\"># -&gt; ['3', '12', '108']</span></pre>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Valider une adresse email (version simplifiée)",
+    statement:"Écrire une regex qui valide un format simplifié <code>utilisateur@domaine.extension</code> (lettres, chiffres, points et tirets autorisés dans la partie locale).",
+    solution:"<pre class=\"code\">^[\\w.-]+@[\\w-]+\\.[a-zA-Z]{2,}$</pre><p><code>[\\w.-]+</code> autorise lettres/chiffres/points/tirets avant le @, <code>[\\w-]+</code> le nom de domaine, et <code>\\.[a-zA-Z]{2,}</code> impose une extension d'au moins 2 lettres.</p><div class=\"box box-attention\"><div class=\"box-title\">ATTENTION</div>Cette regex est simplifiée pour un cadre pédagogique : la validation RFC complète d'un email est beaucoup plus complexe.</div>"
+  },
+  {
+    level:"Niveau 2",
+    title:"Extraire le contenu de balises HTML",
+    statement:"À partir de <code>\"&lt;b&gt;important&lt;/b&gt; et &lt;i&gt;italique&lt;/i&gt;\"</code>, extraire le texte contenu entre chaque paire de balises, en utilisant un quantificateur non gourmand.",
+    solution:"<pre class=\"code\">import re\nre.findall(r\"&lt;\\w+&gt;(.*?)&lt;/\\w+&gt;\", \"&lt;b&gt;important&lt;/b&gt; et &lt;i&gt;italique&lt;/i&gt;\")\n<span class=\"c1\"># -&gt; ['important', 'italique']</span></pre><p>Le <code>?</code> après <code>.*</code> rend le quantificateur paresseux : sans lui, la regex capturerait tout entre la première balise ouvrante et la dernière balise fermante.</p>"
+  },
+  {
+    level:"Niveau 3 — type BTS",
+    title:"Parser une ligne de log serveur",
+    statement:"Une ligne de log a le format : <code>192.168.1.10 - [12/Sep/2026:10:32:01] \"GET /accueil HTTP/1.1\" 200</code>. Écrire une regex avec des <strong>groupes nommés</strong> pour extraire l'IP, la date, la méthode HTTP, le chemin et le code retour.",
+    solution:"<pre class=\"code\">import re\n\nlog = '192.168.1.10 - [12/Sep/2026:10:32:01] \"GET /accueil HTTP/1.1\" 200'\n\nmotif = re.compile(\n    r\"(?P&lt;ip&gt;[\\d.]+) - \\[(?P&lt;date&gt;[^\\]]+)\\] \"\n    r'\"(?P&lt;methode&gt;[A-Z]+) (?P&lt;chemin&gt;\\S+) HTTP/[\\d.]+\" '\n    r\"(?P&lt;code&gt;\\d{3})\"\n)\nm = motif.search(log)\nm.group(\"ip\")       <span class=\"c1\"># -&gt; '192.168.1.10'</span>\nm.group(\"methode\")  <span class=\"c1\"># -&gt; 'GET'</span>\nm.group(\"code\")     <span class=\"c1\"># -&gt; '200'</span></pre><p>Ce type d'exercice — parsing de logs — est un grand classique des sujets BTS CIEL car il combine classes de caractères, groupes nommés et gestion des caractères spéciaux (crochets, guillemets).</p>"
+  },
+  {
+    level:"Bonus — hors programme",
+    title:"Détecter un mot dupliqué",
+    statement:"À partir de la phrase <code>\"le le chat dort dort bien\"</code>, écrire une regex avec rétro-référence qui détecte un mot immédiatement répété.",
+    solution:"<pre class=\"code\">import re\nre.findall(r\"\\b(\\w+)\\s+\\1\\b\", \"le le chat dort dort bien\")\n<span class=\"c1\"># -&gt; ['le', 'dort']</span></pre><p>Le groupe <code>(\\w+)</code> capture un mot, et <code>\\1</code> exige que le mot suivant (séparé par un ou plusieurs espaces) soit identique au groupe capturé. Voir section 6 et 10 du cours.</p>"
+  },
+  {
+    level:"Bonus — hors programme",
+    title:"Valider un mot de passe robuste",
+    statement:"Écrire une regex qui valide un mot de passe d'au moins 8 caractères contenant une majuscule, une minuscule, un chiffre et un caractère spécial, dans n'importe quel ordre.",
+    solution:"<pre class=\"code\">^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$</pre><p>Chaque <code>(?=...)</code> est un lookahead qui vérifie une condition indépendamment, sans consommer de caractères ; le <code>.{8,}$</code> final impose la longueur minimale. Détail complet en section 13 du cours.</p>"
+  }
+];
+
+const exoList = document.getElementById('exo-list');
+exercices.forEach((ex,i)=>{
+  const acc = document.createElement('div');
+  acc.className = 'accordion';
+  acc.innerHTML = `
+    <div class="acc-head">
+      <span><span class="lvl">${ex.level}</span>${ex.title}</span>
+      <span class="acc-arrow">▶</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>${ex.statement}</p>
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;color:var(--amber);font-family:var(--mono);font-size:.85rem;">Voir la solution</summary>
+          <div style="margin-top:10px;">${ex.solution}</div>
+        </details>
+      </div>
+    </div>`;
+  acc.querySelector('.acc-head').addEventListener('click', ()=>acc.classList.toggle('open'));
+  exoList.appendChild(acc);
+});
+
+/* ---------- flashcards ---------- */
+const flashcards = [
+  {q:"Que signifie le métacaractère . (point) ?", a:"N'importe quel caractère, sauf le saut de ligne par défaut."},
+  {q:"Différence entre \\d et \\D ?", a:"\\d = un chiffre [0-9]. \\D = tout sauf un chiffre."},
+  {q:"Que fait le quantificateur + ?", a:"Impose 1 occurrence ou plus de l'élément précédent."},
+  {q:"Que fait le quantificateur * ?", a:"Autorise 0 occurrence ou plus de l'élément précédent."},
+  {q:"Quelle est la différence entre greedy et lazy ?", a:"Greedy (.*) capture le maximum possible. Lazy (.*?) capture le minimum possible, en s'arrêtant au premier match."},
+  {q:"À quoi sert \\b ?", a:"Frontière de mot : marque la limite entre un caractère \\w et un caractère non-\\w, sans consommer de caractère."},
+  {q:"Différence entre un groupe (...) et (?:...) ?", a:"(...) capture le contenu pour réutilisation. (?:...) regroupe sans créer de référence capturée."},
+  {q:"Que fait (?=...) ?", a:"Lookahead positif : vérifie que le motif est suivi de ... sans l'inclure dans le résultat."},
+  {q:"Quel flag Python ignore la casse ?", a:"re.IGNORECASE (ou le flag i)."},
+  {q:"Quelle fonction Python renvoie TOUTES les occurrences d'un motif ?", a:"re.findall()"}
+];
+let flashIndex = 0, flipped = false;
+const flashCardEl = document.getElementById('flash-card');
+const flashFront = document.getElementById('flash-front-text');
+const flashBack = document.getElementById('flash-back-text');
+const flashCount = document.getElementById('flash-count');
+
+function renderFlash(){
+  flashFront.textContent = flashcards[flashIndex].q;
+  flashBack.textContent = flashcards[flashIndex].a;
+  flashCount.textContent = `${flashIndex+1} / ${flashcards.length}`;
+  flashCardEl.classList.remove('flipped');
+  flipped = false;
+}
+flashCardEl.addEventListener('click', ()=>{
+  flipped = !flipped;
+  flashCardEl.classList.toggle('flipped', flipped);
+});
+document.getElementById('flash-next').addEventListener('click', ()=>{
+  flashIndex = (flashIndex+1) % flashcards.length;
+  renderFlash();
+});
+document.getElementById('flash-prev').addEventListener('click', ()=>{
+  flashIndex = (flashIndex-1+flashcards.length) % flashcards.length;
+  renderFlash();
+});
+renderFlash();
+
+/* ---------- QCM ---------- */
+const qcm = [
+  {q:"Que matche la regex ^\\d{3}$ ?", options:["Une chaîne d'au moins 3 chiffres","Une chaîne d'exactement 3 chiffres, rien d'autre","Trois chiffres n'importe où dans la chaîne","Trois lettres"], correct:1},
+  {q:"Quelle classe représente un caractère qui n'est PAS un chiffre ?", options:["\\d","\\w","\\D","\\s"], correct:2},
+  {q:"Quel quantificateur signifie « 0 ou 1 fois » ?", options:["*","+","?","{0,1,}"], correct:2},
+  {q:"Quelle est la version « lazy » du quantificateur * ?", options:["*+","*?","+*","??*"], correct:1},
+  {q:"Que fait re.sub(r\"\\d+\", \"X\", \"a1b22\") en Python ?", options:["'aXbXX'","'aXbX'","'a1b22'","Erreur"], correct:1},
+  {q:"Quel est le rôle d'un groupe non capturant (?:...) ?", options:["Il capture deux fois la valeur","Il regroupe sans créer de référence exploitable","Il interdit toute correspondance","Il équivaut à un lookahead"], correct:1},
+  {q:"Quel flag permet à ^ et $ de matcher chaque ligne d'un texte multi-lignes ?", options:["re.IGNORECASE","re.DOTALL","re.MULTILINE","re.VERBOSE"], correct:2},
+  {q:"Que représente \\b dans \\bchat\\b ?", options:["Un caractère b littéral","Une frontière de mot","Un retour à la ligne","Un backslash"], correct:1},
+  {q:"Pourquoi préfère-t-on écrire une regex Python avec un préfixe r\"...\" ?", options:["Pour la rendre plus rapide","Pour éviter les conflits entre échappement Python et échappement regex","C'est obligatoire en Python 3","Pour activer le mode global"], correct:1},
+  {q:"Quelle fonction Python renvoie uniquement la première correspondance trouvée n'importe où dans la chaîne ?", options:["re.match","re.search","re.findall","re.compile"], correct:1}
+];
+const qcmList = document.getElementById('qcm-list');
+qcm.forEach((item,qi)=>{
+  const div = document.createElement('div');
+  div.className = 'qcm-q';
+  div.innerHTML = `<p class="question">${qi+1}. ${item.q}</p>` +
+    item.options.map((opt,oi)=>`
+      <label class="qcm-opt">
+        <input type="radio" name="q${qi}" value="${oi}">
+        <span>${opt}</span>
+      </label>`).join('') +
+    `<div class="qcm-feedback" id="fb-${qi}"></div>`;
+  qcmList.appendChild(div);
+});
+document.getElementById('qcm-submit').addEventListener('click', ()=>{
+  let score = 0;
+  qcm.forEach((item,qi)=>{
+    const checked = document.querySelector(`input[name="q${qi}"]:checked`);
+    const fb = document.getElementById(`fb-${qi}`);
+    if(!checked){
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = 'Aucune réponse sélectionnée.';
+      return;
+    }
+    if(parseInt(checked.value) === item.correct){
+      score++;
+      fb.className = 'qcm-feedback ok';
+      fb.textContent = '✓ Bonne réponse';
+    }else{
+      fb.className = 'qcm-feedback ko';
+      fb.textContent = '✗ Réponse attendue : ' + item.options[item.correct];
+    }
+  });
+  const scoreEl = document.getElementById('qcm-score');
+  scoreEl.style.display = 'block';
+  scoreEl.innerHTML = `Score : ${score} / ${qcm.length} ${score===qcm.length ? '🎉' : ''}`;
+  scoreEl.scrollIntoView({behavior:'smooth', block:'center'});
+});
+</script>
+</body>
+</html>
